@@ -38,19 +38,19 @@ const ServicesSection = () => {
   };
 
   return (
-    <section id="services" className="py-24 bg-white">
+    <section id="services" className="py-16 sm:py-20 lg:py-24 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-barber-900 mb-6">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-barber-900 mb-4 sm:mb-6">
             Our Services
           </h2>
-          <p className="text-xl text-barber-600 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-barber-600 max-w-2xl mx-auto">
             Choose from our range of professional services, each designed to
             give you the perfect look
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {services.map((service, index) => (
             <Card
               key={index}

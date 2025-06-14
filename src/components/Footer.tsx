@@ -6,9 +6,9 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-barber-900 text-white py-16">
+    <footer className="bg-barber-900 text-white py-12 sm:py-16">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Scissors className="h-6 w-6" />
@@ -82,8 +82,10 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-barber-800 mt-12 pt-8 text-center text-barber-400">
-          <p>&copy; 2024 Booknow.Hair. All rights reserved.</p>
+        <div className="border-t border-barber-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-barber-400">
+          <p className="text-sm sm:text-base">
+            &copy; 2024 Booknow.Hair. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

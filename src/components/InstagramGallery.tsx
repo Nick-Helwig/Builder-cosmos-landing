@@ -49,28 +49,29 @@ const InstagramGallery = () => {
   };
 
   return (
-    <section id="gallery" className="py-24 bg-barber-50">
+    <section id="gallery" className="py-16 sm:py-20 lg:py-24 bg-barber-50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-barber-900 mb-6">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-barber-900 mb-4 sm:mb-6">
             Our Recent Work
           </h2>
-          <p className="text-xl text-barber-600 max-w-2xl mx-auto mb-8">
+          <p className="text-lg sm:text-xl text-barber-600 max-w-2xl mx-auto mb-6 sm:mb-8">
             See our latest cuts and styles on Instagram @college_of_hair_design
           </p>
 
           <Button
             onClick={openInstagram}
             variant="outline"
-            className="border-barber-300 text-barber-700 hover:bg-barber-100"
+            className="border-barber-300 text-barber-700 hover:bg-barber-100 text-sm sm:text-base"
           >
             <Instagram className="h-4 w-4 mr-2" />
-            Follow Us on Instagram
+            <span className="hidden sm:inline">Follow Us on Instagram</span>
+            <span className="sm:hidden">Follow Us</span>
             <ExternalLink className="h-4 w-4 ml-2" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
           {instagramPosts.map((post, index) => (
             <Card
               key={post.id}
