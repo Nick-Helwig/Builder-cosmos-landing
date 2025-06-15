@@ -46,33 +46,55 @@ export async function fetchInstagramPosts(
   limit: number = 6,
 ): Promise<InstagramPost[]> {
   try {
+    console.log("Fetching Instagram posts for @booknow.hair...");
+
     // Use proxy endpoint to avoid CORS issues
     const url = `/api/instagram/user-feeds2?id=${INSTAGRAM_USER_ID}&count=${limit}`;
     const options = {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
-      },
+        'Content-Type': 'application/json',
+      }
     };
 
+    console.log("Making request to:", url);
     const response = await fetch(url, options);
 
+    console.log("Response status:", response.status);
+    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      throw new Error(`RapidAPI Instagram error: ${response.status}`);
+      const errorText = await response.text();
+      console.error("API Error Response:", errorText);
+      throw new Error(`RapidAPI Instagram error: ${response.status} - ${errorText}`);
     }
 
     const result = await response.text();
-    const data: RapidAPIResponse = JSON.parse(result);
+    console.log("Raw API response:", result.substring(0, 200) + "...");
+
+    let data: RapidAPIResponse;
+    try {
+      data = JSON.parse(result);
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError);
+      console.error("Raw response:", result);
+      throw new Error("Invalid JSON response from Instagram API");
+    }
 
     // Transform RapidAPI response to our format
     const posts = data.data?.user?.edge_owner_to_timeline_media?.edges || [];
+    console.log("Found", posts.length, "posts");
 
-    return posts
-      .filter((post) => !post.node.is_video) // Only include images
+    if (posts.length === 0) {
+      console.warn("No posts found in API response");
+      return [];
+    }
+
+    const transformedPosts = posts
+      .filter(post => !post.node.is_video) // Only include images
       .map((post): InstagramPost => {
         const node = post.node;
-        const caption =
-          node.edge_media_to_caption?.edges?.[0]?.node?.text || "";
+        const caption = node.edge_media_to_caption?.edges?.[0]?.node?.text || "";
 
         return {
           id: node.id,
@@ -80,14 +102,23 @@ export async function fetchInstagramPosts(
           media_type: "IMAGE",
           caption: caption,
           permalink: `https://instagram.com/p/${node.shortcode}/`,
-          timestamp: new Date(node.taken_at_timestamp * 1000).toISOString(),
+          timestamp: new Date(node.taken_at_timestamp * 1000).toISOString()
         };
       })
       .slice(0, limit);
+
+    console.log("Transformed", transformedPosts.length, "image posts");
+    return transformedPosts;
+
   } catch (error) {
     console.error("Error fetching Instagram posts from RapidAPI:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return [];
   }
+}
 }
 
 // Alternative method using Instagram username (requires different API setup)

@@ -53,28 +53,37 @@ const InstagramGallery = () => {
 
   const [loading, setLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch Instagram posts from API
   useEffect(() => {
     const loadInstagramPosts = async () => {
       try {
         setLoading(true);
+        setError(null);
+        console.log("InstagramGallery: Starting to load posts...");
+
         const posts = await fetchInstagramPosts(6);
+        console.log("InstagramGallery: Received", posts.length, "posts");
 
         if (posts && posts.length > 0) {
           const formattedPosts = posts.map((post) => ({
             id: post.id,
             image: post.media_url,
-            alt:
-              post.caption?.substring(0, 100) ||
-              "Instagram post from @booknow.hair",
-            permalink: post.permalink,
+            alt: post.caption?.substring(0, 100) || "Instagram post from @booknow.hair",
+            permalink: post.permalink
           }));
           setInstagramPosts(formattedPosts);
           setUsingFallback(false);
+          console.log("InstagramGallery: Successfully loaded real Instagram posts");
+        } else {
+          console.log("InstagramGallery: No posts received, using fallback");
+          setUsingFallback(true);
         }
       } catch (error) {
-        console.log("Instagram API not configured, using fallback images");
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('InstagramGallery: Error loading posts:', errorMessage);
+        setError(errorMessage);
         setUsingFallback(true);
       } finally {
         setLoading(false);
@@ -140,12 +149,19 @@ const InstagramGallery = () => {
             </div>
           )}
 
-          {usingFallback && !loading && (
+          {error && !loading && (
+            <div className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded-lg">
+              <p className="font-medium">Instagram API Error:</p>
+              <p>{error}</p>
+              <p className="text-xs mt-1">Using fallback images. Check console for details.</p>
+            </div>
+          )}
+
+          {usingFallback && !loading && !error && (
             <p className="text-sm text-barber-500 mb-4">
-              Showing sample images.{" "}
-              <a href="/INSTAGRAM_SETUP.md" className="underline">
-                Configure Instagram API
-              </a>{" "}
+              Showing sample images. <a href="/INSTAGRAM_SETUP.md" className="underline">Configure Instagram API</a> for live posts.
+            </p>
+          )}
               for live posts.
             </p>
           )}
