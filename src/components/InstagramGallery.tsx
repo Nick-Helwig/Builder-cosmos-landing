@@ -71,10 +71,23 @@ const InstagramGallery = () => {
         const info = getCacheInfo();
         setCacheInfo(info);
 
+<<<<<<< HEAD
         // Step 2: Load cached posts immediately for smooth UX
         const cachedPosts = getCachedPosts();
         if (cachedPosts && cachedPosts.length > 0) {
           setInstagramPosts(cachedPosts);
+=======
+        if (posts && posts.length > 0) {
+          const formattedPosts = posts.map((post) => ({
+            id: post.id,
+            image: post.image_url,
+            alt:
+              post.caption?.substring(0, 100) ||
+              "Instagram post from @booknow.hair",
+            permalink: post.permalink,
+          }));
+          setInstagramPosts(formattedPosts);
+>>>>>>> 0a6d5a9077400f88ea642ed7243998719164b1fc
           setUsingFallback(false);
           setLoading(false); // Stop loading indicator since we have cached content
         }
