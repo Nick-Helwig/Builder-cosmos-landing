@@ -71,33 +71,16 @@ const InstagramGallery = () => {
         const info = getCacheInfo();
         setCacheInfo(info);
 
-<<<<<<< HEAD
         // Step 2: Load cached posts immediately for smooth UX
         const cachedPosts = getCachedPosts();
         if (cachedPosts && cachedPosts.length > 0) {
           setInstagramPosts(cachedPosts);
-=======
-        if (posts && posts.length > 0) {
-          const formattedPosts = posts.map((post) => ({
-            id: post.id,
-            image: post.image_url,
-            alt:
-              post.caption?.substring(0, 100) ||
-              "Instagram post from @booknow.hair",
-            permalink: post.permalink,
-          }));
-          setInstagramPosts(formattedPosts);
->>>>>>> 0a6d5a9077400f88ea642ed7243998719164b1fc
           setUsingFallback(false);
           setLoading(false); // Stop loading indicator since we have cached content
         }
 
         // Step 3: Check if we need to update cache
         if (!isCacheValid()) {
-          console.log(
-            "InstagramGallery: Cache invalid or expired, fetching fresh posts...",
-          );
-
           // If no cache exists, show loading
           if (!cachedPosts) {
             setLoading(true);
@@ -105,11 +88,6 @@ const InstagramGallery = () => {
 
           // Fetch fresh posts from API
           const posts = await fetchInstagramPosts(12);
-          console.log(
-            "InstagramGallery: Received",
-            posts.length,
-            "fresh posts",
-          );
 
           if (posts && posts.length > 0) {
             const formattedPosts = posts
