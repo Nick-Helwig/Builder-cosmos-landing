@@ -80,6 +80,13 @@ export async function fetchInstagramPosts(
     let data: RapidAPIResponse;
     try {
       data = JSON.parse(result);
+      console.log("Parsed API response structure:", {
+        hasData: !!data.data,
+        hasUser: !!data.data?.user,
+        hasTimeline: !!data.data?.user?.edge_owner_to_timeline_media,
+        edgesCount:
+          data.data?.user?.edge_owner_to_timeline_media?.edges?.length || 0,
+      });
     } catch (parseError) {
       console.error("JSON Parse Error:", parseError);
       console.error("Raw response:", result);
@@ -88,19 +95,32 @@ export async function fetchInstagramPosts(
 
     // Transform RapidAPI response to our format
     const posts = data.data?.user?.edge_owner_to_timeline_media?.edges || [];
-    console.log("Found", posts.length, "posts");
+    console.log("Found", posts.length, "posts from API");
 
     if (posts.length === 0) {
-      console.warn("No posts found in API response");
+      console.warn("No posts found in API response - check data structure");
+      console.log("Full response data:", data);
       return [];
     }
 
     const transformedPosts = posts
-      .filter((post) => !post.node.is_video) // Only include images
-      .map((post): InstagramPost => {
+      .filter((post) => {
+        const isVideo = post.node.is_video;
+        console.log(`Post ${post.node.id}: is_video = ${isVideo}`);
+        return !isVideo; // Only include images
+      })
+      .map((post, index): InstagramPost => {
         const node = post.node;
         const caption =
           node.edge_media_to_caption?.edges?.[0]?.node?.text || "";
+
+        console.log(`Transforming post ${index + 1}:`, {
+          id: node.id,
+          shortcode: node.shortcode,
+          hasDisplayUrl: !!node.display_url,
+          captionLength: caption.length,
+          timestamp: node.taken_at_timestamp,
+        });
 
         return {
           id: node.id,
@@ -113,7 +133,12 @@ export async function fetchInstagramPosts(
       })
       .slice(0, limit);
 
-    console.log("Transformed", transformedPosts.length, "image posts");
+    console.log(
+      "Successfully transformed",
+      transformedPosts.length,
+      "image posts",
+    );
+    console.log("Sample transformed post:", transformedPosts[0]);
     return transformedPosts;
   } catch (error) {
     console.error("Error fetching Instagram posts from RapidAPI:", error);

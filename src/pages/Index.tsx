@@ -4,7 +4,6 @@ import ServicesSection from "@/components/ServicesSection";
 import InstagramGallery from "@/components/InstagramGallery";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
-import InstagramTest from "@/components/InstagramTest";
 
 const Index = () => {
   return (
@@ -17,8 +16,6 @@ const Index = () => {
         <ContactSection />
       </main>
       <Footer />
-      {/* Debug component - remove after testing */}
-      <InstagramTest />
     </div>
   );
 };
