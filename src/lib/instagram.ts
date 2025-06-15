@@ -46,12 +46,12 @@ export async function fetchInstagramPosts(
   limit: number = 6,
 ): Promise<InstagramPost[]> {
   try {
-    const url = `https://instagram-looter2.p.rapidapi.com/user-feeds2?id=${INSTAGRAM_USER_ID}&count=${limit}`;
+    // Use proxy endpoint to avoid CORS issues
+    const url = `/api/instagram/user-feeds2?id=${INSTAGRAM_USER_ID}&count=${limit}`;
     const options = {
       method: "GET",
       headers: {
-        "x-rapidapi-key": RAPIDAPI_KEY,
-        "x-rapidapi-host": "instagram-looter2.p.rapidapi.com",
+        "Content-Type": "application/json",
       },
     };
 
