@@ -64,14 +64,13 @@ const InstagramGallery = () => {
         if (posts && posts.length > 0) {
           const formattedPosts = posts.map((post) => ({
             id: post.id,
-            image: post.media_url,
-            alt:
-              post.caption?.substring(0, 100) ||
-              "Instagram post from @booknow.hair",
-            permalink: post.permalink,
+            image: post.image_url,
+            alt: post.caption?.substring(0, 100) || "Instagram post from @booknow.hair",
+            permalink: post.permalink
           }));
           setInstagramPosts(formattedPosts);
           setUsingFallback(false);
+        }
         }
       } catch (error) {
         console.log("Instagram API not configured, using fallback images");

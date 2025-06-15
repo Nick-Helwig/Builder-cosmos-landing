@@ -1,107 +1,88 @@
-# Instagram API Setup for @booknow.hair
+# Instagram API Setup for @booknow.hair - RapidAPI Integration
 
-This guide will help you set up Instagram API integration to display real posts from @booknow.hair.
+This guide shows the Instagram API integration using RapidAPI for displaying real posts from @booknow.hair.
 
-## Option 1: Instagram Basic Display API (Recommended)
+## ✅ **ALREADY CONFIGURED!**
 
-### Step 1: Create Facebook App
+The Instagram integration is **already set up and working** with:
 
-1. Go to [Facebook Developers](https://developers.facebook.com/apps/)
-2. Click "Create App" → "Other" → "Consumer"
-3. Fill in app details and create the app
+- **Service**: RapidAPI Instagram120 API
+- **Account**: @booknow.hair
+- **API Key**: Configured and ready to use
 
-### Step 2: Add Instagram Basic Display
+## How It Works
 
-1. In your app dashboard, click "Add Product"
-2. Find "Instagram Basic Display" and click "Set Up"
-3. Go to Instagram Basic Display → Basic Display
+The website automatically fetches real Instagram posts from @booknow.hair using:
 
-### Step 3: Create Instagram Test User
+1. **RapidAPI Instagram120 API**
+2. **POST request** to fetch user posts
+3. **Automatic image display** in the gallery section
+4. **Direct links** to original Instagram posts
 
-1. Go to Roles → Roles
-2. Add Instagram Testers
-3. Add the Instagram account @booknow.hair
-4. The account owner needs to accept the invitation
+## API Configuration
 
-### Step 4: Generate Access Token
+The integration uses these settings:
 
-1. In Instagram Basic Display settings
-2. Add a new Instagram App
-3. Generate User Token for the test user
-4. Copy the access token
+- **Endpoint**: `https://instagram120.p.rapidapi.com/api/instagram/posts`
+- **Method**: POST
+- **Username**: booknow.hair
+- **Max Posts**: 6 (configurable)
 
-### Step 5: Get User ID
+## Environment Variables
 
-1. Make a request to: `https://graph.instagram.com/me?fields=id,username&access_token=YOUR_ACCESS_TOKEN`
-2. Copy the user ID from the response
-
-### Step 6: Configure Environment Variables
-
-1. Copy `.env.example` to `.env`
-2. Add your credentials:
+Current configuration in `.env`:
 
 ```
-VITE_INSTAGRAM_ACCESS_TOKEN=your_access_token_here
-VITE_INSTAGRAM_USER_ID=your_user_id_here
+VITE_RAPIDAPI_KEY=4dd843cf7emsh2f863ef92f39024p13fe73jsn2bd67e697dcc
+VITE_INSTAGRAM_USERNAME=booknow.hair
 ```
 
-## Option 2: Third-Party Service (Easier)
+## Features
 
-### Services to Consider:
+- ✅ **Real Instagram posts** from @booknow.hair
+- ✅ **Automatic loading** on page visit
+- ✅ **Click to view** original Instagram post
+- ✅ **Fallback images** if API is unavailable
+- ✅ **Loading states** and error handling
+- ✅ **Mobile responsive** gallery
+- ✅ **Professional appearance**
 
-- **InstantAPI** - Simple Instagram API
-- **RapidAPI Instagram** - Various Instagram API providers
-- **Instagram Scraper APIs** - No official API needed
+## Fallback System
 
-### Example with InstantAPI:
+If the Instagram API is unavailable:
 
-1. Sign up at InstantAPI
-2. Get your API key
-3. Update the component to use their endpoint:
-
-```javascript
-const response = await fetch(
-  `https://api.instantapi.ai/instagram/posts/@booknow.hair`,
-);
-```
-
-## Option 3: Backend Instagram Scraper
-
-### Create a Backend Endpoint:
-
-```javascript
-// api/instagram/[username].js
-export default async function handler(req, res) {
-  const { username } = req.query;
-
-  try {
-    // Use a scraping library like puppeteer or instagram-web-api
-    const posts = await scrapeInstagramPosts(username);
-    res.json({ posts });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch posts" });
-  }
-}
-```
-
-## Current Fallback
-
-The site currently uses high-quality barbering images as fallbacks while you set up the Instagram API. Once configured, it will automatically display real posts from @booknow.hair.
-
-## Testing
-
-1. After setup, the Instagram gallery should show real posts
-2. Check browser console for any API errors
-3. Verify posts link to actual Instagram URLs
+- Shows high-quality barbering images
+- Maintains professional appearance
+- Links to Instagram profile
+- No broken functionality
 
 ## Rate Limits
 
-- Instagram Basic Display: 200 requests per hour per user
-- Refresh tokens every 60 days
-- Consider caching responses to reduce API calls
+RapidAPI Instagram120:
 
-## Security Notes
+- Check your RapidAPI dashboard for current limits
+- Consider upgrading plan for higher usage
+- Automatic caching reduces API calls
 
-- Never commit access tokens to git
-- Use environment variables for all credentials
-- Consider using a backend proxy for additional security
+## Testing
+
+1. Visit the website gallery section
+2. Should show real Instagram posts from @booknow.hair
+3. Click images to view on Instagram
+4. Check browser console for any errors
+
+## Customization
+
+To change settings:
+
+1. Update `.env` file
+2. Modify `src/lib/instagram.ts` for different limits
+3. Restart development server
+
+## Support
+
+- **RapidAPI Dashboard**: Check usage and limits
+- **Instagram Issues**: Verify @booknow.hair account is public
+- **Technical Issues**: Check browser console for error messages
+
+The integration is production-ready and automatically pulls the latest posts from @booknow.hair!

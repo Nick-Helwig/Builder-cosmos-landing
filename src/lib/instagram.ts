@@ -1,75 +1,94 @@
-// Instagram Basic Display API integration
-// This file handles fetching Instagram posts from @booknow.hair
+// RapidAPI Instagram integration
+// This file handles fetching Instagram posts from @booknow.hair using RapidAPI
 
 interface InstagramPost {
   id: string;
-  media_url: string;
+  image_url: string;
   media_type: string;
   caption?: string;
   permalink: string;
-  timestamp: string;
+  timestamp?: string;
 }
 
-interface InstagramResponse {
-  data: InstagramPost[];
-  paging?: {
-    cursors: {
-      before: string;
-      after: string;
-    };
-    next?: string;
+interface RapidAPIInstagramResponse {
+  status: string;
+  data: {
+    posts: Array<{
+      id: string;
+      shortcode: string;
+      display_url: string;
+      edge_media_to_caption?: {
+        edges: Array<{
+          node: {
+            text: string;
+          };
+        }>;
+      };
+      taken_at_timestamp: number;
+    }>;
   };
 }
 
-const INSTAGRAM_ACCESS_TOKEN = import.meta.env.VITE_INSTAGRAM_ACCESS_TOKEN;
-const INSTAGRAM_USER_ID = import.meta.env.VITE_INSTAGRAM_USER_ID;
+const RAPIDAPI_KEY =
+  import.meta.env.VITE_RAPIDAPI_KEY ||
+  "4dd843cf7emsh2f863ef92f39024p13fe73jsn2bd67e697dcc";
+const RAPIDAPI_HOST = "instagram120.p.rapidapi.com";
 
 export async function fetchInstagramPosts(
   limit: number = 6,
+  username: string = "booknow.hair",
 ): Promise<InstagramPost[]> {
-  if (!INSTAGRAM_ACCESS_TOKEN || !INSTAGRAM_USER_ID) {
-    console.warn(
-      "Instagram API credentials not configured. Using fallback images.",
-    );
-    return [];
-  }
-
   try {
-    const response = await fetch(
-      `https://graph.instagram.com/${INSTAGRAM_USER_ID}/media?fields=id,media_url,media_type,caption,permalink,timestamp&limit=${limit}&access_token=${INSTAGRAM_ACCESS_TOKEN}`,
-    );
+    const url = "https://instagram120.p.rapidapi.com/api/instagram/posts";
+    const options = {
+      method: "POST",
+      headers: {
+        "x-rapidapi-key": RAPIDAPI_KEY,
+        "x-rapidapi-host": RAPIDAPI_HOST,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        maxId: "",
+      }),
+    };
+
+    const response = await fetch(url, options);
 
     if (!response.ok) {
-      throw new Error(`Instagram API error: ${response.status}`);
+      throw new Error(`RapidAPI Instagram error: ${response.status}`);
     }
 
-    const data: InstagramResponse = await response.json();
+    const result = await response.text();
+    const data: RapidAPIInstagramResponse = JSON.parse(result);
 
-    // Filter to only include image posts (no videos for now)
-    return data.data.filter((post) => post.media_type === "IMAGE");
+    if (data.status !== "success" || !data.data?.posts) {
+      console.warn("No Instagram posts found or API error");
+      return [];
+    }
+
+    // Transform RapidAPI response to our format
+    const transformedPosts: InstagramPost[] = data.data.posts
+      .slice(0, limit)
+      .map((post) => ({
+        id: post.id,
+        image_url: post.display_url,
+        media_type: "IMAGE",
+        caption: post.edge_media_to_caption?.edges?.[0]?.node?.text || "",
+        permalink: `https://instagram.com/p/${post.shortcode}/`,
+        timestamp: new Date(post.taken_at_timestamp * 1000).toISOString(),
+      }));
+
+    return transformedPosts;
   } catch (error) {
     console.error("Error fetching Instagram posts:", error);
     return [];
   }
 }
 
-// Alternative method using Instagram username (requires different API setup)
+// Fallback method for testing
 export async function fetchInstagramPostsByUsername(
   username: string = "booknow.hair",
 ): Promise<InstagramPost[]> {
-  try {
-    // This would require a backend service to scrape Instagram
-    // or use a third-party service like InstantAPI or similar
-    const response = await fetch(`/api/instagram/${username}`);
-
-    if (!response.ok) {
-      throw new Error(`Instagram fetch error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.posts || [];
-  } catch (error) {
-    console.error("Error fetching Instagram posts by username:", error);
-    return [];
-  }
+  return fetchInstagramPosts(6, username);
 }
