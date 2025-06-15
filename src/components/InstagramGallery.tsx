@@ -64,18 +64,20 @@ const InstagramGallery = () => {
         setError(null);
         console.log("InstagramGallery: Starting to load posts...");
 
-        const posts = await fetchInstagramPosts(6);
+        const posts = await fetchInstagramPosts(12); // Fetch more to ensure we get 6 image posts
         console.log("InstagramGallery: Received", posts.length, "posts");
 
         if (posts && posts.length > 0) {
-          const formattedPosts = posts.map((post) => ({
-            id: post.id,
-            image: post.media_url,
-            alt:
-              post.caption?.substring(0, 100) ||
-              "Instagram post from @booknow.hair",
-            permalink: post.permalink,
-          }));
+          const formattedPosts = posts
+            .map((post) => ({
+              id: post.id,
+              image: post.media_url,
+              alt:
+                post.caption?.substring(0, 100) ||
+                "Instagram post from @booknow.hair",
+              permalink: post.permalink,
+            }))
+            .slice(0, 6); // Limit display to exactly 6 posts
           setInstagramPosts(formattedPosts);
           setUsingFallback(false);
           console.log(
