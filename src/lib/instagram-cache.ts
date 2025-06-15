@@ -37,12 +37,8 @@ export function isCacheValid(): boolean {
 
     if (!isValid) {
       console.log("Instagram cache expired, needs refresh");
-    } else {
-      const hoursOld = Math.round(
-        (now - cacheData.timestamp) / (60 * 60 * 1000),
-      );
-      console.log(`Instagram cache is ${hoursOld} hours old, still valid`);
     }
+    // Removed verbose cache age logging to reduce console noise
 
     return isValid;
   } catch (error) {

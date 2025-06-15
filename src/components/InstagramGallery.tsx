@@ -74,7 +74,6 @@ const InstagramGallery = () => {
         // Step 2: Load cached posts immediately for smooth UX
         const cachedPosts = getCachedPosts();
         if (cachedPosts && cachedPosts.length > 0) {
-          console.log("InstagramGallery: Loading cached posts immediately");
           setInstagramPosts(cachedPosts);
           setUsingFallback(false);
           setLoading(false); // Stop loading indicator since we have cached content
@@ -119,18 +118,11 @@ const InstagramGallery = () => {
             // Cache the fresh posts
             cachePosts(formattedPosts);
             setCacheInfo(getCacheInfo());
-
-            console.log(
-              "InstagramGallery: Successfully updated with fresh Instagram posts",
-            );
           } else {
-            console.log("InstagramGallery: No fresh posts received");
             if (!cachedPosts) {
               setUsingFallback(true);
             }
           }
-        } else {
-          console.log("InstagramGallery: Using valid cached posts");
         }
       } catch (error) {
         const errorMessage =
