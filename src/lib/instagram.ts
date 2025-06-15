@@ -1,5 +1,5 @@
 // Instagram Basic Display API integration
-// This file handles fetching Instagram posts from @college_of_hair_design
+// This file handles fetching Instagram posts from @booknow.hair
 
 interface InstagramPost {
   id: string;
@@ -55,7 +55,7 @@ export async function fetchInstagramPosts(
 
 // Alternative method using Instagram username (requires different API setup)
 export async function fetchInstagramPostsByUsername(
-  username: string = "college_of_hair_design",
+  username: string = "booknow.hair",
 ): Promise<InstagramPost[]> {
   try {
     // This would require a backend service to scrape Instagram

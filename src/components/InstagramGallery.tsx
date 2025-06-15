@@ -12,42 +12,42 @@ const InstagramGallery = () => {
       image:
         "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Classic fade haircut",
-      permalink: "https://instagram.com/college_of_hair_design",
+      permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback2",
       image:
         "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Beard trim and styling",
-      permalink: "https://instagram.com/college_of_hair_design",
+      permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback3",
       image:
         "https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Modern undercut style",
-      permalink: "https://instagram.com/college_of_hair_design",
+      permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback4",
       image:
         "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Professional haircut",
-      permalink: "https://instagram.com/college_of_hair_design",
+      permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback5",
       image:
         "https://images.unsplash.com/photo-1606330458767-b7374dccdb0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Stylish beard grooming",
-      permalink: "https://instagram.com/college_of_hair_design",
+      permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback6",
       image:
         "https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Fresh cut and style",
-      permalink: "https://instagram.com/college_of_hair_design",
+      permalink: "https://instagram.com/booknow.hair",
     },
   ]);
 
@@ -67,7 +67,7 @@ const InstagramGallery = () => {
             image: post.media_url,
             alt:
               post.caption?.substring(0, 100) ||
-              "Instagram post from @college_of_hair_design",
+              "Instagram post from @booknow.hair",
             permalink: post.permalink,
           }));
           setInstagramPosts(formattedPosts);
@@ -85,7 +85,7 @@ const InstagramGallery = () => {
   }, []);
 
   const openInstagram = () => {
-    window.open("https://instagram.com/college_of_hair_design", "_blank");
+    window.open("https://instagram.com/booknow.hair", "_blank");
   };
 
   return (
@@ -96,7 +96,7 @@ const InstagramGallery = () => {
             Our Recent Work
           </h2>
           <p className="text-lg sm:text-xl text-barber-600 max-w-2xl mx-auto mb-6 sm:mb-8">
-            See our latest cuts and styles on Instagram @college_of_hair_design
+            See our latest cuts and styles on Instagram @booknow.hair
           </p>
 
           <Button
@@ -158,7 +158,7 @@ const InstagramGallery = () => {
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8"
           >
             <Instagram className="h-4 w-4 mr-2" />
-            @college_of_hair_design
+            @booknow.hair
           </Button>
         </div>
       </div>

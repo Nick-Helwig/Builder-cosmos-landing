@@ -2,7 +2,7 @@ import { Scissors, Instagram, MapPin, Phone } from "lucide-react";
 
 const Footer = () => {
   const openInstagram = () => {
-    window.open("https://instagram.com/college_of_hair_design", "_blank");
+    window.open("https://instagram.com/booknow.hair", "_blank");
   };
 
   return (
@@ -77,7 +77,7 @@ const Footer = () => {
               className="flex items-center gap-2 text-barber-300 hover:text-white transition-colors"
             >
               <Instagram className="h-4 w-4" />
-              <span>@college_of_hair_design</span>
+              <span>@booknow.hair</span>
             </button>
           </div>
         </div>

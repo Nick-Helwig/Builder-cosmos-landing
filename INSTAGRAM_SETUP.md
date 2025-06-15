@@ -1,6 +1,6 @@
-# Instagram API Setup for @college_of_hair_design
+# Instagram API Setup for @booknow.hair
 
-This guide will help you set up Instagram API integration to display real posts from @college_of_hair_design.
+This guide will help you set up Instagram API integration to display real posts from @booknow.hair.
 
 ## Option 1: Instagram Basic Display API (Recommended)
 
@@ -20,7 +20,7 @@ This guide will help you set up Instagram API integration to display real posts 
 
 1. Go to Roles → Roles
 2. Add Instagram Testers
-3. Add the Instagram account @college_of_hair_design
+3. Add the Instagram account @booknow.hair
 4. The account owner needs to accept the invitation
 
 ### Step 4: Generate Access Token
@@ -61,7 +61,7 @@ VITE_INSTAGRAM_USER_ID=your_user_id_here
 
 ```javascript
 const response = await fetch(
-  `https://api.instantapi.ai/instagram/posts/@college_of_hair_design`,
+  `https://api.instantapi.ai/instagram/posts/@booknow.hair`,
 );
 ```
 
@@ -86,7 +86,7 @@ export default async function handler(req, res) {
 
 ## Current Fallback
 
-The site currently uses high-quality barbering images as fallbacks while you set up the Instagram API. Once configured, it will automatically display real posts from @college_of_hair_design.
+The site currently uses high-quality barbering images as fallbacks while you set up the Instagram API. Once configured, it will automatically display real posts from @booknow.hair.
 
 ## Testing
 
