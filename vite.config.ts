@@ -26,16 +26,20 @@ export default defineConfig(({ mode }) => ({
         },
       },
       "/proxy/instagram-image": {
-        target: "https://scontent.cdninstagram.com",
+        target: "https://instagram.fbcn2-1.fna.fbcdn.net",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/proxy\/instagram-image/, ""),
         configure: (proxy, options) => {
           proxy.on("proxyReq", (proxyReq, req, res) => {
             proxyReq.setHeader(
               "User-Agent",
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             );
             proxyReq.setHeader("Referer", "https://www.instagram.com/");
+            proxyReq.setHeader(
+              "Accept",
+              "image/webp,image/apng,image/*,*/*;q=0.8",
+            );
           });
         },
       },
