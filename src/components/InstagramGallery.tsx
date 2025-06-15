@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Instagram, ExternalLink } from "lucide-react";
+import { Instagram, ExternalLink, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { fetchInstagramPosts } from "@/lib/instagram";
 
 const InstagramGallery = () => {
   const [instagramPosts, setInstagramPosts] = useState([
@@ -50,33 +51,37 @@ const InstagramGallery = () => {
     },
   ]);
 
+  const [loading, setLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(true);
+
   // Fetch Instagram posts from API
   useEffect(() => {
-    const fetchInstagramPosts = async () => {
+    const loadInstagramPosts = async () => {
       try {
-        // Instagram Basic Display API call
-        // You'll need to replace this with your actual Instagram API endpoint
-        const response = await fetch("/api/instagram-feed");
-        if (response.ok) {
-          const data = await response.json();
-          if (data.data && data.data.length > 0) {
-            const formattedPosts = data.data.slice(0, 6).map((post: any) => ({
-              id: post.id,
-              image: post.media_url,
-              alt:
-                post.caption || "Instagram post from @college_of_hair_design",
-              permalink: post.permalink,
-            }));
-            setInstagramPosts(formattedPosts);
-          }
+        setLoading(true);
+        const posts = await fetchInstagramPosts(6);
+
+        if (posts && posts.length > 0) {
+          const formattedPosts = posts.map((post) => ({
+            id: post.id,
+            image: post.media_url,
+            alt:
+              post.caption?.substring(0, 100) ||
+              "Instagram post from @college_of_hair_design",
+            permalink: post.permalink,
+          }));
+          setInstagramPosts(formattedPosts);
+          setUsingFallback(false);
         }
       } catch (error) {
         console.log("Instagram API not configured, using fallback images");
-        // Keep fallback images if API fails
+        setUsingFallback(true);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchInstagramPosts();
+    loadInstagramPosts();
   }, []);
 
   const openInstagram = () => {
@@ -128,6 +133,23 @@ const InstagramGallery = () => {
         </div>
 
         <div className="text-center mt-12">
+          {loading && (
+            <div className="flex items-center justify-center mb-4">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <span className="text-barber-600">Loading latest posts...</span>
+            </div>
+          )}
+
+          {usingFallback && !loading && (
+            <p className="text-sm text-barber-500 mb-4">
+              Showing sample images.{" "}
+              <a href="/INSTAGRAM_SETUP.md" className="underline">
+                Configure Instagram API
+              </a>{" "}
+              for live posts.
+            </p>
+          )}
+
           <p className="text-barber-600 mb-4">
             Want to see more? Follow us for daily updates and style inspiration
           </p>
