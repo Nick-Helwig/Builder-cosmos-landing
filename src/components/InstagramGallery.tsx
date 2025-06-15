@@ -4,6 +4,12 @@ import { Instagram, ExternalLink, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { fetchInstagramPosts } from "@/lib/instagram";
 import InstagramImage from "@/components/InstagramImage";
+import {
+  isCacheValid,
+  getCachedPosts,
+  cachePosts,
+  getCacheInfo
+} from "@/lib/instagram-cache";
 
 const InstagramGallery = () => {
   const [instagramPosts, setInstagramPosts] = useState([
@@ -55,44 +61,80 @@ const InstagramGallery = () => {
   const [loading, setLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cacheInfo, setCacheInfo] = useState({ exists: false, age: 0 });
 
-  // Fetch Instagram posts from API
+  // Smart Instagram loading with cache-first approach
   useEffect(() => {
     const loadInstagramPosts = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        console.log("InstagramGallery: Starting to load posts...");
+        // Step 1: Check cache info for display
+        const info = getCacheInfo();
+        setCacheInfo(info);
 
-        const posts = await fetchInstagramPosts(12); // Fetch more to ensure we get 6 image posts
-        console.log("InstagramGallery: Received", posts.length, "posts");
+        // Step 2: Load cached posts immediately for smooth UX
+        const cachedPosts = getCachedPosts();
+        if (cachedPosts && cachedPosts.length > 0) {
+          console.log("InstagramGallery: Loading cached posts immediately");
+          setInstagramPosts(cachedPosts);
+          setUsingFallback(false);
+          setLoading(false); // Stop loading indicator since we have cached content
+        }
 
-        if (posts && posts.length > 0) {
-          const formattedPosts = posts
-            .map((post) => ({
+        // Step 3: Check if we need to update cache
+        if (!isCacheValid()) {
+          console.log("InstagramGallery: Cache invalid or expired, fetching fresh posts...");
+
+          // If no cache exists, show loading
+          if (!cachedPosts) {
+            setLoading(true);
+          }
+
+          // Fetch fresh posts from API
+          const posts = await fetchInstagramPosts(12);
+          console.log("InstagramGallery: Received", posts.length, "fresh posts");
+
+          if (posts && posts.length > 0) {
+            const formattedPosts = posts.map((post) => ({
               id: post.id,
               image: post.media_url,
-              alt:
-                post.caption?.substring(0, 100) ||
-                "Instagram post from @booknow.hair",
-              permalink: post.permalink,
-            }))
-            .slice(0, 6); // Limit display to exactly 6 posts
-          setInstagramPosts(formattedPosts);
-          setUsingFallback(false);
-          console.log(
-            "InstagramGallery: Successfully loaded real Instagram posts",
-          );
+              alt: post.caption?.substring(0, 100) || "Instagram post from @booknow.hair",
+              permalink: post.permalink
+            })).slice(0, 6);
+
+            // Update display with fresh posts
+            setInstagramPosts(formattedPosts);
+            setUsingFallback(false);
+            setError(null);
+
+            // Cache the fresh posts
+            cachePosts(formattedPosts);
+            setCacheInfo(getCacheInfo());
+
+            console.log("InstagramGallery: Successfully updated with fresh Instagram posts");
+          } else {
+            console.log("InstagramGallery: No fresh posts received");
+            if (!cachedPosts) {
+              setUsingFallback(true);
+            }
+          }
         } else {
-          console.log("InstagramGallery: No posts received, using fallback");
+          console.log("InstagramGallery: Using valid cached posts");
+        }
+
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('InstagramGallery: Error loading posts:', errorMessage);
+
+        // If we have cached posts, keep using them even if API fails
+        const cachedPosts = getCachedPosts();
+        if (cachedPosts && cachedPosts.length > 0) {
+          console.log("InstagramGallery: API failed but using cached posts");
+          setInstagramPosts(cachedPosts);
+          setUsingFallback(false);
+        } else {
+          setError(errorMessage);
           setUsingFallback(true);
         }
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        console.error("InstagramGallery: Error loading posts:", errorMessage);
-        setError(errorMessage);
-        setUsingFallback(true);
       } finally {
         setLoading(false);
       }
@@ -161,18 +203,21 @@ const InstagramGallery = () => {
             <div className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded-lg">
               <p className="font-medium">Instagram API Error:</p>
               <p>{error}</p>
-              <p className="text-xs mt-1">
-                Using fallback images. Check console for details.
-              </p>
+              <p className="text-xs mt-1">Using fallback images. Check console for details.</p>
+            </div>
+          )}
+
+          {cacheInfo.exists && !usingFallback && (
+            <div className="text-xs text-barber-500 mb-4 p-2 bg-barber-50 rounded">
+              📸 Live Instagram photos • Updated {cacheInfo.age}h ago • Auto-refresh in {24 - (cacheInfo.age || 0)}h
             </div>
           )}
 
           {usingFallback && !loading && !error && (
             <p className="text-sm text-barber-500 mb-4">
-              Showing sample images.{" "}
-              <a href="/INSTAGRAM_SETUP.md" className="underline">
-                Configure Instagram API
-              </a>{" "}
+              Showing sample images. <a href="/INSTAGRAM_SETUP.md" className="underline">Configure Instagram API</a> for live posts.
+            </p>
+          )}
               for live posts.
             </p>
           )}
