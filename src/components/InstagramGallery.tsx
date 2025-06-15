@@ -70,19 +70,24 @@ const InstagramGallery = () => {
           const formattedPosts = posts.map((post) => ({
             id: post.id,
             image: post.media_url,
-            alt: post.caption?.substring(0, 100) || "Instagram post from @booknow.hair",
-            permalink: post.permalink
+            alt:
+              post.caption?.substring(0, 100) ||
+              "Instagram post from @booknow.hair",
+            permalink: post.permalink,
           }));
           setInstagramPosts(formattedPosts);
           setUsingFallback(false);
-          console.log("InstagramGallery: Successfully loaded real Instagram posts");
+          console.log(
+            "InstagramGallery: Successfully loaded real Instagram posts",
+          );
         } else {
           console.log("InstagramGallery: No posts received, using fallback");
           setUsingFallback(true);
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('InstagramGallery: Error loading posts:', errorMessage);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error("InstagramGallery: Error loading posts:", errorMessage);
         setError(errorMessage);
         setUsingFallback(true);
       } finally {
@@ -153,15 +158,18 @@ const InstagramGallery = () => {
             <div className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded-lg">
               <p className="font-medium">Instagram API Error:</p>
               <p>{error}</p>
-              <p className="text-xs mt-1">Using fallback images. Check console for details.</p>
+              <p className="text-xs mt-1">
+                Using fallback images. Check console for details.
+              </p>
             </div>
           )}
 
           {usingFallback && !loading && !error && (
             <p className="text-sm text-barber-500 mb-4">
-              Showing sample images. <a href="/INSTAGRAM_SETUP.md" className="underline">Configure Instagram API</a> for live posts.
-            </p>
-          )}
+              Showing sample images.{" "}
+              <a href="/INSTAGRAM_SETUP.md" className="underline">
+                Configure Instagram API
+              </a>{" "}
               for live posts.
             </p>
           )}

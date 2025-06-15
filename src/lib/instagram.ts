@@ -51,22 +51,27 @@ export async function fetchInstagramPosts(
     // Use proxy endpoint to avoid CORS issues
     const url = `/api/instagram/user-feeds2?id=${INSTAGRAM_USER_ID}&count=${limit}`;
     const options = {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-      }
+        "Content-Type": "application/json",
+      },
     };
 
     console.log("Making request to:", url);
     const response = await fetch(url, options);
 
     console.log("Response status:", response.status);
-    console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+    console.log(
+      "Response headers:",
+      Object.fromEntries(response.headers.entries()),
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error("API Error Response:", errorText);
-      throw new Error(`RapidAPI Instagram error: ${response.status} - ${errorText}`);
+      throw new Error(
+        `RapidAPI Instagram error: ${response.status} - ${errorText}`,
+      );
     }
 
     const result = await response.text();
@@ -91,10 +96,11 @@ export async function fetchInstagramPosts(
     }
 
     const transformedPosts = posts
-      .filter(post => !post.node.is_video) // Only include images
+      .filter((post) => !post.node.is_video) // Only include images
       .map((post): InstagramPost => {
         const node = post.node;
-        const caption = node.edge_media_to_caption?.edges?.[0]?.node?.text || "";
+        const caption =
+          node.edge_media_to_caption?.edges?.[0]?.node?.text || "";
 
         return {
           id: node.id,
@@ -102,23 +108,21 @@ export async function fetchInstagramPosts(
           media_type: "IMAGE",
           caption: caption,
           permalink: `https://instagram.com/p/${node.shortcode}/`,
-          timestamp: new Date(node.taken_at_timestamp * 1000).toISOString()
+          timestamp: new Date(node.taken_at_timestamp * 1000).toISOString(),
         };
       })
       .slice(0, limit);
 
     console.log("Transformed", transformedPosts.length, "image posts");
     return transformedPosts;
-
   } catch (error) {
     console.error("Error fetching Instagram posts from RapidAPI:", error);
     console.error("Error details:", {
       message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     });
     return [];
   }
-}
 }
 
 // Alternative method using Instagram username (requires different API setup)
