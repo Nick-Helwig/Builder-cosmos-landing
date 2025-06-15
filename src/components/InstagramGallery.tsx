@@ -1,48 +1,83 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Instagram, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const InstagramGallery = () => {
-  // Placeholder Instagram-style images for demonstration
-  // In a real implementation, you'd fetch from Instagram API
-  const instagramPosts = [
+  const [instagramPosts, setInstagramPosts] = useState([
+    // Fallback images while Instagram API loads
     {
-      id: 1,
+      id: "fallback1",
       image:
         "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Classic fade haircut",
+      permalink: "https://instagram.com/college_of_hair_design",
     },
     {
-      id: 2,
+      id: "fallback2",
       image:
         "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Beard trim and styling",
+      permalink: "https://instagram.com/college_of_hair_design",
     },
     {
-      id: 3,
+      id: "fallback3",
       image:
         "https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Modern undercut style",
+      permalink: "https://instagram.com/college_of_hair_design",
     },
     {
-      id: 4,
+      id: "fallback4",
       image:
         "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Professional haircut",
+      permalink: "https://instagram.com/college_of_hair_design",
     },
     {
-      id: 5,
+      id: "fallback5",
       image:
         "https://images.unsplash.com/photo-1606330458767-b7374dccdb0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Stylish beard grooming",
+      permalink: "https://instagram.com/college_of_hair_design",
     },
     {
-      id: 6,
+      id: "fallback6",
       image:
         "https://images.unsplash.com/photo-1582095133179-bfd08e2fc6b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       alt: "Fresh cut and style",
+      permalink: "https://instagram.com/college_of_hair_design",
     },
-  ];
+  ]);
+
+  // Fetch Instagram posts from API
+  useEffect(() => {
+    const fetchInstagramPosts = async () => {
+      try {
+        // Instagram Basic Display API call
+        // You'll need to replace this with your actual Instagram API endpoint
+        const response = await fetch("/api/instagram-feed");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data && data.data.length > 0) {
+            const formattedPosts = data.data.slice(0, 6).map((post: any) => ({
+              id: post.id,
+              image: post.media_url,
+              alt:
+                post.caption || "Instagram post from @college_of_hair_design",
+              permalink: post.permalink,
+            }));
+            setInstagramPosts(formattedPosts);
+          }
+        }
+      } catch (error) {
+        console.log("Instagram API not configured, using fallback images");
+        // Keep fallback images if API fails
+      }
+    };
+
+    fetchInstagramPosts();
+  }, []);
 
   const openInstagram = () => {
     window.open("https://instagram.com/college_of_hair_design", "_blank");
@@ -76,7 +111,7 @@ const InstagramGallery = () => {
             <Card
               key={post.id}
               className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
-              onClick={openInstagram}
+              onClick={() => window.open(post.permalink, "_blank")}
             >
               <div className="aspect-square relative overflow-hidden">
                 <img
