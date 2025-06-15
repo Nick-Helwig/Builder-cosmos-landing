@@ -118,6 +118,7 @@ export async function fetchInstagramPosts(
           id: node.id,
           shortcode: node.shortcode,
           hasDisplayUrl: !!node.display_url,
+          displayUrl: node.display_url,
           captionLength: caption.length,
           timestamp: node.taken_at_timestamp,
         });

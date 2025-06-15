@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Instagram, ExternalLink, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { fetchInstagramPosts } from "@/lib/instagram";
+import InstagramImage from "@/components/InstagramImage";
 
 const InstagramGallery = () => {
   const [instagramPosts, setInstagramPosts] = useState([
@@ -133,10 +134,10 @@ const InstagramGallery = () => {
               onClick={() => window.open(post.permalink, "_blank")}
             >
               <div className="aspect-square relative overflow-hidden">
-                <img
+                <InstagramImage
                   src={post.image}
                   alt={post.alt}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="group-hover:scale-110 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <Instagram className="h-8 w-8 text-white" />
