@@ -28,18 +28,36 @@ export default defineConfig(({ mode }) => ({
       "/proxy/instagram-image": {
         target: "https://instagram.fbcn2-1.fna.fbcdn.net",
         changeOrigin: true,
+        secure: true,
         rewrite: (path) => path.replace(/^\/proxy\/instagram-image/, ""),
         configure: (proxy, options) => {
           proxy.on("proxyReq", (proxyReq, req, res) => {
+            // Set headers to mimic a real browser request from Instagram
             proxyReq.setHeader(
               "User-Agent",
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             );
             proxyReq.setHeader("Referer", "https://www.instagram.com/");
+            proxyReq.setHeader("Origin", "https://www.instagram.com");
             proxyReq.setHeader(
               "Accept",
-              "image/webp,image/apng,image/*,*/*;q=0.8",
+              "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
             );
+            proxyReq.setHeader("Accept-Language", "en-US,en;q=0.9");
+            proxyReq.setHeader("Cache-Control", "no-cache");
+            proxyReq.setHeader("Pragma", "no-cache");
+            proxyReq.setHeader("Sec-Fetch-Dest", "image");
+            proxyReq.setHeader("Sec-Fetch-Mode", "no-cors");
+            proxyReq.setHeader("Sec-Fetch-Site", "same-site");
+          });
+
+          proxy.on("proxyRes", (proxyRes, req, res) => {
+            // Add CORS headers to allow browser access
+            proxyRes.headers["Access-Control-Allow-Origin"] = "*";
+            proxyRes.headers["Access-Control-Allow-Methods"] =
+              "GET, POST, PUT, DELETE, OPTIONS";
+            proxyRes.headers["Access-Control-Allow-Headers"] =
+              "Content-Type, Authorization";
           });
         },
       },
