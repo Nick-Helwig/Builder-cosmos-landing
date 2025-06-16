@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Scissors, Users, Home } from "lucide-react";
+import { Check, Scissors, Users, Home, Phone } from "lucide-react";
 import { useState } from "react";
 import BookingModal from "./BookingModal";
 
@@ -48,6 +48,19 @@ const ServicesSection = () => {
         "Ultimate convenience",
       ],
     },
+    {
+      icon: <Phone className="h-8 w-8" />,
+      name: "Same Day Appointment",
+      description: "Unable to book online? Call for same-day accommodation",
+      price: "$65",
+      duration: "30 min",
+      features: [
+        "Contact via phone",
+        "Same day availability",
+        "Flexible scheduling",
+        "Personal accommodation",
+      ],
+    },
   ];
 
   const openBooking = () => {
@@ -67,7 +80,7 @@ const ServicesSection = () => {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
           {services.map((service, index) => (
             <Card
               key={index}
