@@ -1,40 +1,57 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Scissors, Waves, Sparkles } from "lucide-react";
+import { Check, Scissors, Users, Home } from "lucide-react";
+import { useState } from "react";
+import BookingModal from "./BookingModal";
 
 const ServicesSection = () => {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
   const services = [
     {
       icon: <Scissors className="h-8 w-8" />,
-      name: "Classic Cut",
-      description: "Traditional scissor cut with precision styling",
+      name: "Premium Haircut",
+      description:
+        "Custom tailored haircut with fading, tapering, blending and texturing",
       price: "$35",
-      duration: "45 min",
-      features: ["Consultation", "Wash & Style", "Hot Towel Finish"],
+      duration: "30 min",
+      features: [
+        "Includes beard trim",
+        "Eyebrow styling",
+        "Professional styling",
+        "Hot towel finish",
+      ],
     },
     {
-      icon: <Waves className="h-8 w-8" />,
-      name: "Beard Trim",
-      description: "Professional beard shaping and grooming",
+      icon: <Users className="h-8 w-8" />,
+      name: "Basic Kids Cut",
+      description: "Simple, clean cuts perfect for children",
       price: "$25",
       duration: "30 min",
-      features: ["Beard Wash", "Precise Trimming", "Styling Products"],
+      features: [
+        "No fades",
+        "Quick & gentle service",
+        "Kid-friendly approach",
+        "Basic styling",
+      ],
     },
     {
-      icon: <Sparkles className="h-8 w-8" />,
-      name: "The Full Experience",
-      description: "Complete grooming package with premium service",
-      price: "$65",
-      duration: "90 min",
-      features: ["Haircut", "Beard Trim", "Hot Towel Shave", "Styling"],
+      icon: <Home className="h-8 w-8" />,
+      name: "House Call Service",
+      description: "Concierge-style service at your convenience",
+      price: "$110",
+      duration: "30 min",
+      features: [
+        "Service at your location",
+        "Professional equipment",
+        "Contact for group bookings",
+        "Ultimate convenience",
+      ],
     },
   ];
 
   const openBooking = () => {
-    window.open(
-      "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2FER0ii_8nZuUakF7KarNHCkkPOVaGrBT9oa4=",
-      "_blank",
-    );
+    setIsBookingModalOpen(true);
   };
 
   return (
@@ -96,6 +113,11 @@ const ServicesSection = () => {
           ))}
         </div>
       </div>
+
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
     </section>
   );
 };
