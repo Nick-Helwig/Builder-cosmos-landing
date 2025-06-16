@@ -27,7 +27,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
         <div className="flex-1 px-6 pb-6">
           <div className="w-full h-full rounded-lg overflow-hidden border border-barber-200">
             <iframe
-              src="https://calendar.google.com/calendar/embed?src=a9e7b779de91b65c7b309ea0c8538307a9f6fc259589a0e25622218775a9b264%40group.calendar.google.com&ctz=UTC"
+              src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1N1ExrZA16pettGJBFNzDAUjYvxr4vwtXSD4VsdvhTy81VLXrBiEhIluJX-8E3w9RBbD3fRBhJ"
               className="w-full h-full min-h-[500px]"
               style={{ border: 0 }}
               frameBorder="0"
