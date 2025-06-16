@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Scissors, Menu, X } from "lucide-react";
 import { useState } from "react";
+import BookingModal from "./BookingModal";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -12,10 +14,7 @@ const Header = () => {
   };
 
   const openBooking = () => {
-    window.open(
-      "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2FER0ii_8nZuUakF7KarNHCkkPOVaGrBT9oa4=",
-      "_blank",
-    );
+    setIsBookingModalOpen(true);
     setIsMenuOpen(false);
   };
 
@@ -103,6 +102,11 @@ const Header = () => {
           </nav>
         </div>
       )}
+
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
     </header>
   );
 };
