@@ -25,14 +25,14 @@ const ServicesSection = () => {
     {
       icon: <Users className="h-8 w-8" />,
       name: "Basic Kids Cut",
-      description: "Simple, clean cuts perfect for children",
+      description: "Simple, clean cuts perfect for children 15 and under",
       price: "$25",
       duration: "30 min",
       features: [
+        "Ages 15 and under",
         "No fades",
         "Quick & gentle service",
         "Kid-friendly approach",
-        "Basic styling",
       ],
     },
     {
@@ -65,6 +65,10 @@ const ServicesSection = () => {
 
   const openBooking = () => {
     setIsBookingModalOpen(true);
+  };
+
+  const callPhone = () => {
+    window.open("tel:7169940608", "_self");
   };
 
   return (
@@ -116,10 +120,18 @@ const ServicesSection = () => {
                 </div>
 
                 <Button
-                  onClick={openBooking}
+                  onClick={
+                    service.name === "House Call Service" ||
+                    service.name === "Same Day Appointment"
+                      ? callPhone
+                      : openBooking
+                  }
                   className="w-full bg-barber-900 hover:bg-barber-800 text-white"
                 >
-                  Book This Service
+                  {service.name === "House Call Service" ||
+                  service.name === "Same Day Appointment"
+                    ? "Call Me"
+                    : "Book This Service"}
                 </Button>
               </CardContent>
             </Card>
