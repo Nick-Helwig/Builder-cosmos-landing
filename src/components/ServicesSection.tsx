@@ -88,35 +88,46 @@ const ServicesSection = () => {
           {services.map((service, index) => (
             <Card
               key={index}
-              className="border-barber-200 hover:shadow-xl transition-all duration-300 group h-full"
+              className="border-barber-200 hover:shadow-xl transition-all duration-300 group"
+              style={{ height: "480px" }}
             >
-              <CardContent className="p-8 h-full flex flex-col">
-                <div className="text-barber-700 mb-4 group-hover:text-gold-600 transition-colors">
-                  {service.icon}
-                </div>
+              <CardContent className="p-8 h-full flex flex-col justify-between">
+                <div className="flex-1">
+                  <div className="text-barber-700 mb-4 group-hover:text-gold-600 transition-colors">
+                    {service.icon}
+                  </div>
 
-                <h3 className="text-2xl font-semibold text-barber-900 mb-2">
-                  {service.name}
-                </h3>
+                  <div className="h-16 mb-4">
+                    <h3 className="text-2xl font-semibold text-barber-900 leading-tight">
+                      {service.name}
+                    </h3>
+                  </div>
 
-                <p className="text-barber-600 mb-4">{service.description}</p>
+                  <div className="h-12 mb-6">
+                    <p className="text-barber-600 text-sm leading-tight">
+                      {service.description}
+                    </p>
+                  </div>
 
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-3xl font-bold text-barber-900">
-                    {service.price}
-                  </span>
-                  <span className="text-sm text-barber-500">
-                    {service.duration}
-                  </span>
-                </div>
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-3xl font-bold text-barber-900">
+                      {service.price}
+                    </span>
+                    <span className="text-sm text-barber-500">
+                      {service.duration}
+                    </span>
+                  </div>
 
-                <div className="space-y-3 mb-6 flex-grow">
-                  {service.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-gold-600" />
-                      <span className="text-sm text-barber-600">{feature}</span>
-                    </div>
-                  ))}
+                  <div className="space-y-2 mb-8 h-24">
+                    {service.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-gold-600 flex-shrink-0" />
+                        <span className="text-sm text-barber-600">
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <Button
@@ -126,7 +137,7 @@ const ServicesSection = () => {
                       ? callPhone
                       : openBooking
                   }
-                  className="w-full bg-barber-900 hover:bg-barber-800 text-white"
+                  className="w-full bg-barber-900 hover:bg-barber-800 text-white mt-auto"
                 >
                   {service.name === "House Call Service" ||
                   service.name === "Same Day Appointment"
