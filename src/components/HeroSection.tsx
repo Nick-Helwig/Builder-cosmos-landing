@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Star } from "lucide-react";
+import { useState } from "react";
+import BookingModal from "./BookingModal";
 
 const HeroSection = () => {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
   const openBooking = () => {
-    window.open(
-      "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2FER0ii_8nZuUakF7KarNHCkkPOVaGrBT9oa4=",
-      "_blank",
-    );
+    setIsBookingModalOpen(true);
   };
 
   return (
@@ -87,6 +88,11 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
     </section>
   );
 };

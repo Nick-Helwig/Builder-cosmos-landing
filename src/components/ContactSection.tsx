@@ -1,13 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Phone, Calendar } from "lucide-react";
+import { useState } from "react";
+import BookingModal from "./BookingModal";
 
 const ContactSection = () => {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
   const openBooking = () => {
-    window.open(
-      "https://calendar.google.com/calendar/appointments/schedules/AcZssZ2FER0ii_8nZuUakF7KarNHCkkPOVaGrBT9oa4=",
-      "_blank",
-    );
+    setIsBookingModalOpen(true);
   };
 
   const openMaps = () => {
@@ -142,6 +143,11 @@ const ContactSection = () => {
           </div>
         </div>
       </div>
+
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+      />
     </section>
   );
 };
