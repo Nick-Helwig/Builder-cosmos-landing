@@ -130,8 +130,8 @@ const ServicesSection = () => {
                 >
                   {service.name === "House Call Service" ||
                   service.name === "Same Day Appointment"
-                    ? "Call Me"
-                    : "Book This Service"}
+                    ? "Call to make appointment"
+                    : "Book Now"}
                 </Button>
               </CardContent>
             </Card>
