@@ -21,6 +21,7 @@ const ServicesSection = () => {
         "Professional styling",
         "Hot towel finish",
       ],
+      isCallService: false,
     },
     {
       icon: <Users className="h-8 w-8" />,
@@ -34,6 +35,7 @@ const ServicesSection = () => {
         "Quick & gentle service",
         "Kid-friendly approach",
       ],
+      isCallService: false,
     },
     {
       icon: <Home className="h-8 w-8" />,
@@ -47,6 +49,7 @@ const ServicesSection = () => {
         "Contact for group bookings",
         "Ultimate convenience",
       ],
+      isCallService: true,
     },
     {
       icon: <Phone className="h-8 w-8" />,
@@ -60,6 +63,7 @@ const ServicesSection = () => {
         "Flexible scheduling",
         "Personal accommodation",
       ],
+      isCallService: true,
     },
   ];
 
@@ -68,7 +72,19 @@ const ServicesSection = () => {
   };
 
   const callPhone = () => {
-    window.open("tel:7169940608", "_self");
+    // Try multiple methods to ensure the phone call works
+    try {
+      // Method 1: Direct window.location
+      window.location.href = "tel:+17169940608";
+    } catch (error) {
+      // Method 2: window.open as fallback
+      try {
+        window.open("tel:+17169940608", "_self");
+      } catch (error2) {
+        // Method 3: Last resort - show alert with number
+        alert("Please call: (716) 994-0608");
+      }
+    }
   };
 
   return (
@@ -88,41 +104,45 @@ const ServicesSection = () => {
           {services.map((service, index) => (
             <Card
               key={index}
-              className="border-barber-200 hover:shadow-xl transition-all duration-300 group"
-              style={{ height: "480px" }}
+              className="border-barber-200 hover:shadow-xl transition-all duration-300 group flex flex-col"
             >
-              <CardContent className="p-8 h-full flex flex-col justify-between">
-                <div className="flex-1">
-                  <div className="text-barber-700 mb-4 group-hover:text-gold-600 transition-colors">
-                    {service.icon}
-                  </div>
+              <CardContent className="p-8 flex flex-col h-full">
+                {/* Icon - Fixed height */}
+                <div className="text-barber-700 mb-4 group-hover:text-gold-600 transition-colors h-8 flex items-center">
+                  {service.icon}
+                </div>
 
-                  <div className="h-16 mb-4">
-                    <h3 className="text-2xl font-semibold text-barber-900 leading-tight">
-                      {service.name}
-                    </h3>
-                  </div>
+                {/* Title - Fixed height */}
+                <div className="h-16 flex items-start mb-4">
+                  <h3 className="text-xl font-semibold text-barber-900 leading-tight">
+                    {service.name}
+                  </h3>
+                </div>
 
-                  <div className="h-12 mb-6">
-                    <p className="text-barber-600 text-sm leading-tight">
-                      {service.description}
-                    </p>
-                  </div>
+                {/* Description - Fixed height */}
+                <div className="h-12 flex items-start mb-6">
+                  <p className="text-barber-600 text-sm leading-tight">
+                    {service.description}
+                  </p>
+                </div>
 
-                  <div className="flex items-center justify-between mb-6">
-                    <span className="text-3xl font-bold text-barber-900">
-                      {service.price}
-                    </span>
-                    <span className="text-sm text-barber-500">
-                      {service.duration}
-                    </span>
-                  </div>
+                {/* Price and duration */}
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-3xl font-bold text-barber-900">
+                    {service.price}
+                  </span>
+                  <span className="text-sm text-barber-500">
+                    {service.duration}
+                  </span>
+                </div>
 
-                  <div className="space-y-2 mb-8 h-24">
+                {/* Features - Fixed height */}
+                <div className="h-24 mb-8">
+                  <div className="space-y-2">
                     {service.features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-gold-600 flex-shrink-0" />
-                        <span className="text-sm text-barber-600">
+                        <Check className="h-3 w-3 text-gold-600 flex-shrink-0" />
+                        <span className="text-xs text-barber-600">
                           {feature}
                         </span>
                       </div>
@@ -130,20 +150,17 @@ const ServicesSection = () => {
                   </div>
                 </div>
 
-                <Button
-                  onClick={
-                    service.name === "House Call Service" ||
-                    service.name === "Same Day Appointment"
-                      ? callPhone
-                      : openBooking
-                  }
-                  className="w-full bg-barber-900 hover:bg-barber-800 text-white mt-auto"
-                >
-                  {service.name === "House Call Service" ||
-                  service.name === "Same Day Appointment"
-                    ? "Call to make appointment"
-                    : "Book Now"}
-                </Button>
+                {/* Button - Always at bottom */}
+                <div className="mt-auto">
+                  <Button
+                    onClick={service.isCallService ? callPhone : openBooking}
+                    className="w-full bg-barber-900 hover:bg-barber-800 text-white"
+                  >
+                    {service.isCallService
+                      ? "Call to make appointment"
+                      : "Book Now"}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
