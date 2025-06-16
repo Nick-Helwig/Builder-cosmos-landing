@@ -88,9 +88,9 @@ const ServicesSection = () => {
           {services.map((service, index) => (
             <Card
               key={index}
-              className="border-barber-200 hover:shadow-xl transition-all duration-300 group"
+              className="border-barber-200 hover:shadow-xl transition-all duration-300 group h-full"
             >
-              <CardContent className="p-8">
+              <CardContent className="p-8 h-full flex flex-col">
                 <div className="text-barber-700 mb-4 group-hover:text-gold-600 transition-colors">
                   {service.icon}
                 </div>
@@ -110,7 +110,7 @@ const ServicesSection = () => {
                   </span>
                 </div>
 
-                <div className="space-y-3 mb-6">
+                <div className="space-y-3 mb-6 flex-grow">
                   {service.features.map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-2">
                       <Check className="h-4 w-4 text-gold-600" />
