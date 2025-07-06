@@ -70,18 +70,18 @@ const ContactSection = () => {
                     <h3 className="text-xl font-semibold text-barber-900 mb-2">
                       Hours
                     </h3>
-                    <div className="space-y-1 text-barber-600 text-sm sm:text-base">
-                      <div className="flex justify-between">
+                    <div className="space-y-2 text-barber-600 text-sm sm:text-base">
+                      <div className="flex justify-between gap-4">
                         <span>Monday - Friday</span>
-                        <span>9:00 AM - 7:00 PM</span>
+                        <span className="text-right">9:00 AM - 7:00 PM</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-4">
                         <span>Saturday</span>
-                        <span>8:00 AM - 6:00 PM</span>
+                        <span className="text-right">8:00 AM - 6:00 PM</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-4">
                         <span>Sunday</span>
-                        <span>10:00 AM - 4:00 PM</span>
+                        <span className="text-right">10:00 AM - 4:00 PM</span>
                       </div>
                     </div>
                   </div>
