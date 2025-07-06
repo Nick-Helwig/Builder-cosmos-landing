@@ -61,11 +61,11 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-barber-300">
                 <MapPin className="h-4 w-4" />
-                <span>123 Main Street, Downtown</span>
+                <span>2567 Sheridan Dr, Tonawanda Town, NY 14150</span>
               </div>
               <div className="flex items-center gap-2 text-barber-300">
                 <Phone className="h-4 w-4" />
-                <span>(123) 456-7890</span>
+                <span>(716) 994-0608</span>
               </div>
             </div>
           </div>

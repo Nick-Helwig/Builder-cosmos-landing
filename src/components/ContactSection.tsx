@@ -16,7 +16,7 @@ const ContactSection = () => {
   };
 
   const callPhone = () => {
-    window.open("tel:+1234567890", "_self");
+    window.open("tel:+17169940608", "_self");
   };
 
   return (
@@ -43,11 +43,9 @@ const ContactSection = () => {
                       Location
                     </h3>
                     <p className="text-barber-600 mb-4">
-                      123 Main Street
+                      2567 Sheridan Dr
                       <br />
-                      Downtown District
-                      <br />
-                      Your City, ST 12345
+                      Tonawanda Town, NY 14150
                     </p>
                     <Button
                       onClick={openMaps}
@@ -100,7 +98,7 @@ const ContactSection = () => {
                     <p className="text-barber-600 mb-4">
                       Call us for walk-ins or questions
                       <br />
-                      (123) 456-7890
+                      (716) 994-0608
                     </p>
                     <Button
                       onClick={callPhone}

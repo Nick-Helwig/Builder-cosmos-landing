@@ -53,7 +53,7 @@ const HeroSection = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-8 text-sm text-barber-600">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>Downtown Location</span>
+                <span>Tonawanda Location</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
