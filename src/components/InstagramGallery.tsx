@@ -1,19 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Instagram, ExternalLink, Loader2 } from "lucide-react";
+import { Instagram, ExternalLink, Loader2, Server, Wifi } from "lucide-react";
 import { useState, useEffect } from "react";
-import { fetchInstagramPosts } from "@/lib/instagram";
+import { fetchInstagramPosts, checkServerHealth } from "@/lib/instagram-server";
 import InstagramImage from "@/components/InstagramImage";
-import {
-  isCacheValid,
-  getCachedPosts,
-  cachePosts,
-  getCacheInfo,
-} from "@/lib/instagram-cache";
 
 const InstagramGallery = () => {
   const [instagramPosts, setInstagramPosts] = useState([
-    // Fallback images while Instagram API loads
+    // Fallback images while server loads
     {
       id: "fallback1",
       image:
@@ -59,77 +53,54 @@ const InstagramGallery = () => {
   ]);
 
   const [loading, setLoading] = useState(true);
-  const [usingFallback, setUsingFallback] = useState(true);
+  const [serverOnline, setServerOnline] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("Connecting to server...");
   const [error, setError] = useState<string | null>(null);
-  const [cacheInfo, setCacheInfo] = useState({ exists: false, age: 0 });
 
-  // Smart Instagram loading with cache-first approach
+  // Server-side Instagram loading
   useEffect(() => {
     const loadInstagramPosts = async () => {
       try {
-        // Step 1: Check cache info for display
-        const info = getCacheInfo();
-        setCacheInfo(info);
+        setLoading(true);
+        setStatusMessage("Checking server status...");
 
-        // Step 2: Load cached posts immediately for smooth UX
-        const cachedPosts = getCachedPosts();
-        if (cachedPosts && cachedPosts.length > 0) {
-          setInstagramPosts(cachedPosts);
-          setUsingFallback(false);
-          setLoading(false); // Stop loading indicator since we have cached content
-        }
+        // Check server health first
+        const health = await checkServerHealth();
+        setServerOnline(health.healthy);
 
-        // Step 3: Check if we need to update cache
-        if (!isCacheValid()) {
-          // If no cache exists, show loading
-          if (!cachedPosts) {
-            setLoading(true);
-          }
+        if (health.healthy) {
+          setStatusMessage("Loading cached Instagram posts...");
 
-          // Fetch fresh posts from API
-          const posts = await fetchInstagramPosts(12);
+          // Fetch posts from server cache
+          const serverPosts = await fetchInstagramPosts(6);
 
-          if (posts && posts.length > 0) {
-            const formattedPosts = posts
-              .map((post) => ({
-                id: post.id,
-                image: post.media_url,
-                alt:
-                  post.caption?.substring(0, 100) ||
-                  "Instagram post from @booknow.hair",
-                permalink: post.permalink,
-              }))
-              .slice(0, 6);
+          if (serverPosts && serverPosts.length > 0) {
+            const formattedPosts = serverPosts.map((post) => ({
+              id: post.id,
+              image: post.imageUrl,
+              alt: post.alt || "Instagram post from @booknow.hair",
+              permalink: post.permalink,
+            }));
 
-            // Update display with fresh posts
             setInstagramPosts(formattedPosts);
-            setUsingFallback(false);
+            setStatusMessage("Loaded from server cache");
             setError(null);
-
-            // Cache the fresh posts
-            cachePosts(formattedPosts);
-            setCacheInfo(getCacheInfo());
           } else {
-            if (!cachedPosts) {
-              setUsingFallback(true);
-            }
+            setStatusMessage("No posts available from server");
+            setError("Server returned no posts");
           }
+        } else {
+          setStatusMessage("Server offline - using fallback images");
+          setError("Cannot connect to backend server");
         }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         console.error("InstagramGallery: Error loading posts:", errorMessage);
 
-        // If we have cached posts, keep using them even if API fails
-        const cachedPosts = getCachedPosts();
-        if (cachedPosts && cachedPosts.length > 0) {
-          console.log("InstagramGallery: API failed but using cached posts");
-          setInstagramPosts(cachedPosts);
-          setUsingFallback(false);
-        } else {
-          setError(errorMessage);
-          setUsingFallback(true);
-        }
+        setError(errorMessage);
+        setStatusMessage("Error loading posts - using fallback images");
+        setServerOnline(false);
       } finally {
         setLoading(false);
       }
@@ -190,34 +161,49 @@ const InstagramGallery = () => {
           {loading && (
             <div className="flex items-center justify-center mb-4">
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-barber-600">Loading latest posts...</span>
+              <span className="text-barber-600">{statusMessage}</span>
+            </div>
+          )}
+
+          {!loading && (
+            <div className="flex items-center justify-center mb-4">
+              {serverOnline ? (
+                <div className="flex items-center text-green-600">
+                  <Server className="h-4 w-4 mr-2" />
+                  <span className="text-sm">{statusMessage}</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-orange-600">
+                  <Wifi className="h-4 w-4 mr-2" />
+                  <span className="text-sm">{statusMessage}</span>
+                </div>
+              )}
             </div>
           )}
 
           {error && !loading && (
-            <div className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded-lg">
-              <p className="font-medium">Instagram API Error:</p>
+            <div className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded-lg max-w-md mx-auto">
+              <p className="font-medium">Server Status:</p>
               <p>{error}</p>
               <p className="text-xs mt-1">
-                Using fallback images. Check console for details.
+                Using fallback images. Check server connection.
               </p>
             </div>
           )}
 
-          {cacheInfo.exists && !usingFallback && (
-            <div className="text-xs text-barber-500 mb-4 p-2 bg-barber-50 rounded">
-              📸 Live Instagram photos • Updated {cacheInfo.age}h ago •
-              Auto-refresh in {24 - (cacheInfo.age || 0)}h
+          {serverOnline && !loading && !error && (
+            <div className="text-xs text-green-600 mb-4 p-2 bg-green-50 rounded max-w-md mx-auto">
+              📸 Live Instagram photos from server cache • Updates automatically
+              every 6 hours
             </div>
           )}
 
-          {usingFallback && !loading && !error && (
+          {!serverOnline && !loading && (
             <p className="text-sm text-barber-500 mb-4">
               Showing sample images.{" "}
-              <a href="/INSTAGRAM_SETUP.md" className="underline">
-                Configure Instagram API
-              </a>{" "}
-              for live posts.
+              <span className="font-medium">
+                Start the Node.js server to load real Instagram posts.
+              </span>
             </p>
           )}
 
