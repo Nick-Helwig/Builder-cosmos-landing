@@ -10,43 +10,37 @@ const InstagramGallery = () => {
     // Fallback images while server loads
     {
       id: "fallback1",
-      image:
-        "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F5a810b6046624480a2eb30416f8952db?format=webp&width=400",
+      image: `${import.meta.env.VITE_SERVER_URL || "http://localhost:3001"}/fallback-images/fallback_1.jpg`,
       alt: "Before and after haircut transformation",
       permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback2",
-      image:
-        "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F1a742b83e9844c48a6f2b72a620ba4d4?format=webp&width=400",
+      image: `${import.meta.env.VITE_SERVER_URL || "http://localhost:3001"}/fallback-images/fallback_2.jpg`,
       alt: "Professional fade haircut and beard trim",
       permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback3",
-      image:
-        "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F3136516fcc6b4161a9050523c29997e0?format=webp&width=400",
+      image: `${import.meta.env.VITE_SERVER_URL || "http://localhost:3001"}/fallback-images/fallback_3.jpg`,
       alt: "Modern haircut with precision styling",
       permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback4",
-      image:
-        "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2Fe8f0e21303384544ab3a1f34b47fb324?format=webp&width=400",
+      image: `${import.meta.env.VITE_SERVER_URL || "http://localhost:3001"}/fallback-images/fallback_4.jpg`,
       alt: "Before and after professional haircut",
       permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback5",
-      image:
-        "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F06c0ddf6ac454c57866ef7de961a1106?format=webp&width=400",
+      image: `${import.meta.env.VITE_SERVER_URL || "http://localhost:3001"}/fallback-images/fallback_5.jpg`,
       alt: "Clean fade with beard grooming",
       permalink: "https://instagram.com/booknow.hair",
     },
     {
       id: "fallback6",
-      image:
-        "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2Ff9e082277de34ee097b6c08f32308699?format=webp&width=400",
+      image: `${import.meta.env.VITE_SERVER_URL || "http://localhost:3001"}/fallback-images/fallback_6.jpg`,
       alt: "Premium haircut and styling service",
       permalink: "https://instagram.com/booknow.hair",
     },

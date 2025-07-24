@@ -25,48 +25,42 @@ const SERVER_BASE_URL =
 const FALLBACK_POSTS: InstagramPost[] = [
   {
     id: "fallback_1",
-    imageUrl:
-      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F5a810b6046624480a2eb30416f8952db?format=webp&width=400",
+    imageUrl: `${SERVER_BASE_URL}/fallback-images/fallback_1.jpg`,
     alt: "Before and after haircut transformation",
     permalink: "https://instagram.com/booknow.hair/",
     caption: "Amazing transformation at Booknow.Hair",
   },
   {
     id: "fallback_2",
-    imageUrl:
-      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F1a742b83e9844c48a6f2b72a620ba4d4?format=webp&width=400",
+    imageUrl: `${SERVER_BASE_URL}/fallback-images/fallback_2.jpg`,
     alt: "Professional fade haircut and beard trim",
     permalink: "https://instagram.com/booknow.hair/",
     caption: "Fresh fade and beard styling",
   },
   {
     id: "fallback_3",
-    imageUrl:
-      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F3136516fcc6b4161a9050523c29997e0?format=webp&width=400",
+    imageUrl: `${SERVER_BASE_URL}/fallback-images/fallback_3.jpg`,
     alt: "Modern haircut with precision styling",
     permalink: "https://instagram.com/booknow.hair/",
     caption: "Precision cutting and styling",
   },
   {
     id: "fallback_4",
-    imageUrl:
-      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2Fe8f0e21303384544ab3a1f34b47fb324?format=webp&width=400",
+    imageUrl: `${SERVER_BASE_URL}/fallback-images/fallback_4.jpg`,
     alt: "Before and after professional haircut",
     permalink: "https://instagram.com/booknow.hair/",
     caption: "Expert hair transformation",
   },
   {
     id: "fallback_5",
-    imageUrl:
-      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F06c0ddf6ac454c57866ef7de961a1106?format=webp&width=400",
+    imageUrl: `${SERVER_BASE_URL}/fallback-images/fallback_5.jpg`,
     alt: "Clean fade with beard grooming",
     permalink: "https://instagram.com/booknow.hair/",
     caption: "Perfect fade and beard combination",
   },
   {
     id: "fallback_6",
-    imageUrl:
-      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2Ff9e082277de34ee097b6c08f32308699?format=webp&width=400",
+    imageUrl: `${SERVER_BASE_URL}/fallback-images/fallback_6.jpg`,
     alt: "Premium haircut and styling service",
     permalink: "https://instagram.com/booknow.hair/",
     caption: "Premium barbering at its finest",

@@ -1,0 +1,35 @@
+{
+  "created": "2025-07-24T02:10:19.287Z",
+  "images": [
+    {
+      "filename": "fallback_1.jpg",
+      "alt": "Before and after haircut transformation",
+      "path": "/fallback-images/fallback_1.jpg"
+    },
+    {
+      "filename": "fallback_2.jpg",
+      "alt": "Professional fade haircut and beard trim",
+      "path": "/fallback-images/fallback_2.jpg"
+    },
+    {
+      "filename": "fallback_3.jpg",
+      "alt": "Modern haircut with precision styling",
+      "path": "/fallback-images/fallback_3.jpg"
+    },
+    {
+      "filename": "fallback_4.jpg",
+      "alt": "Before and after professional haircut",
+      "path": "/fallback-images/fallback_4.jpg"
+    },
+    {
+      "filename": "fallback_5.jpg",
+      "alt": "Clean fade with beard grooming",
+      "path": "/fallback-images/fallback_5.jpg"
+    },
+    {
+      "filename": "fallback_6.jpg",
+      "alt": "Premium haircut and styling service",
+      "path": "/fallback-images/fallback_6.jpg"
+    }
+  ]
+}
