@@ -26,50 +26,50 @@ const FALLBACK_POSTS: InstagramPost[] = [
   {
     id: "fallback_1",
     imageUrl:
-      "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=400&h=400&fit=crop",
-    alt: "Professional barber cutting hair",
+      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F5a810b6046624480a2eb30416f8952db?format=webp&width=400",
+    alt: "Before and after haircut transformation",
     permalink: "https://instagram.com/booknow.hair/",
-    caption: "Professional barbering services",
+    caption: "Amazing transformation at Booknow.Hair",
   },
   {
     id: "fallback_2",
     imageUrl:
-      "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&h=400&fit=crop",
-    alt: "Classic barbershop interior",
+      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F1a742b83e9844c48a6f2b72a620ba4d4?format=webp&width=400",
+    alt: "Professional fade haircut and beard trim",
     permalink: "https://instagram.com/booknow.hair/",
-    caption: "Classic barbershop experience",
+    caption: "Fresh fade and beard styling",
   },
   {
     id: "fallback_3",
     imageUrl:
-      "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&h=400&fit=crop",
-    alt: "Beard trimming service",
+      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F3136516fcc6b4161a9050523c29997e0?format=webp&width=400",
+    alt: "Modern haircut with precision styling",
     permalink: "https://instagram.com/booknow.hair/",
-    caption: "Expert beard trimming",
+    caption: "Precision cutting and styling",
   },
   {
     id: "fallback_4",
     imageUrl:
-      "https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=400&h=400&fit=crop",
-    alt: "Hair styling tools",
+      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2Fe8f0e21303384544ab3a1f34b47fb324?format=webp&width=400",
+    alt: "Before and after professional haircut",
     permalink: "https://instagram.com/booknow.hair/",
-    caption: "Professional styling tools",
+    caption: "Expert hair transformation",
   },
   {
     id: "fallback_5",
     imageUrl:
-      "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop",
-    alt: "Barber chair and mirrors",
+      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F06c0ddf6ac454c57866ef7de961a1106?format=webp&width=400",
+    alt: "Clean fade with beard grooming",
     permalink: "https://instagram.com/booknow.hair/",
-    caption: "Modern barbershop setup",
+    caption: "Perfect fade and beard combination",
   },
   {
     id: "fallback_6",
     imageUrl:
-      "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=400&h=400&fit=crop",
-    alt: "Fresh haircut result",
+      "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2Ff9e082277de34ee097b6c08f32308699?format=webp&width=400",
+    alt: "Premium haircut and styling service",
     permalink: "https://instagram.com/booknow.hair/",
-    caption: "Perfect haircut results",
+    caption: "Premium barbering at its finest",
   },
 ];
 

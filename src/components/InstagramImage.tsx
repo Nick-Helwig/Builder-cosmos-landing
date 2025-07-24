@@ -14,7 +14,7 @@ const InstagramImage = ({ src, alt, className }: InstagramImageProps) => {
 
   // Fallback image for when all proxies fail
   const fallbackImage =
-    "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+    "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F5a810b6046624480a2eb30416f8952db?format=webp&width=400";
 
   // Multiple proxy services for better reliability
   const getProxiedUrl = (originalUrl: string, attempt: number): string => {
