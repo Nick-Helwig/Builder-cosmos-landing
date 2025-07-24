@@ -80,20 +80,37 @@ const InstagramGallery = () => {
             setStatusMessage("Loaded from server cache");
             setError(null);
           } else {
-            setStatusMessage("No posts available from server");
-            setError("Server returned no posts");
+            if (import.meta.env.DEV) {
+              setStatusMessage("No posts available from server");
+              setError("Server returned no posts");
+            } else {
+              setStatusMessage("Showing our recent work");
+              setError(null);
+            }
           }
         } else {
-          setStatusMessage("Server offline - using fallback images");
-          setError("Cannot connect to backend server");
+          // In production, don't set error state - just use fallbacks silently
+          if (import.meta.env.DEV) {
+            setStatusMessage("Server offline - using fallback images");
+            setError("Cannot connect to backend server");
+          } else {
+            setStatusMessage("Showing our recent work");
+            setError(null);
+          }
         }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         console.error("InstagramGallery: Error loading posts:", errorMessage);
 
-        setError(errorMessage);
-        setStatusMessage("Error loading posts - using fallback images");
+        // In production, don't show error details to users
+        if (import.meta.env.DEV) {
+          setError(errorMessage);
+          setStatusMessage("Error loading posts - using fallback images");
+        } else {
+          setError(null);
+          setStatusMessage("Showing our recent work");
+        }
         setServerOnline(false);
       } finally {
         setLoading(false);
