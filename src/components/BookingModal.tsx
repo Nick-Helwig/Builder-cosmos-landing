@@ -21,10 +21,6 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
           </DialogTitle>
           <DialogDescription className="text-barber-600">
             Select your preferred time and date from our available slots below.
-            <br />
-            <span className="text-sm font-medium text-barber-700">
-              All times shown in Eastern Time (EST/EDT)
-            </span>
           </DialogDescription>
         </DialogHeader>
 
