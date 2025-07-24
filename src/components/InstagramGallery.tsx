@@ -115,7 +115,7 @@ const InstagramGallery = () => {
             Our Recent Work
           </h2>
           <p className="text-lg sm:text-xl text-barber-600 max-w-2xl mx-auto mb-6 sm:mb-8">
-            See our latest cuts and styles on Instagram @booknow.hair
+            Check out our latest cuts and transformations
           </p>
 
           <Button
@@ -152,14 +152,16 @@ const InstagramGallery = () => {
         </div>
 
         <div className="text-center mt-12">
-          {loading && (
+          {/* Only show loading in development or when server is actually expected */}
+          {loading && import.meta.env.DEV && (
             <div className="flex items-center justify-center mb-4">
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
               <span className="text-barber-600">{statusMessage}</span>
             </div>
           )}
 
-          {!loading && (
+          {/* Only show server status in development */}
+          {!loading && import.meta.env.DEV && (
             <div className="flex items-center justify-center mb-4">
               {serverOnline ? (
                 <div className="flex items-center text-green-600">
@@ -175,7 +177,8 @@ const InstagramGallery = () => {
             </div>
           )}
 
-          {error && !loading && (
+          {/* Only show error details in development */}
+          {error && !loading && import.meta.env.DEV && (
             <div className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded-lg max-w-md mx-auto">
               <p className="font-medium">Server Status:</p>
               <p>{error}</p>
@@ -185,6 +188,7 @@ const InstagramGallery = () => {
             </div>
           )}
 
+          {/* Show server cache status only when actually connected */}
           {serverOnline && !loading && !error && (
             <div className="text-xs text-green-600 mb-4 p-2 bg-green-50 rounded max-w-md mx-auto">
               📸 Live Instagram photos from server cache • Updates automatically
@@ -192,14 +196,7 @@ const InstagramGallery = () => {
             </div>
           )}
 
-          {!serverOnline && !loading && (
-            <p className="text-sm text-barber-500 mb-4">
-              Showing sample images.{" "}
-              <span className="font-medium">
-                Start the Node.js server to load real Instagram posts.
-              </span>
-            </p>
-          )}
+          {/* In production, don't show any server-related messages - just show the images */}
 
           <p className="text-barber-600 mb-4">
             Want to see more? Follow us for daily updates and style inspiration
