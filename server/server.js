@@ -20,6 +20,12 @@ app.use(
   express.static(path.join(__dirname, "cache/images")),
 );
 
+// Serve fallback images
+app.use(
+  "/fallback-images",
+  express.static(path.join(__dirname, "public/fallback-images")),
+);
+
 // API Routes
 app.get("/api/instagram/posts", async (req, res) => {
   try {
