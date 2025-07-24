@@ -13,7 +13,7 @@ const InstagramImage = ({ src, alt, className }: InstagramImageProps) => {
   const [retryCount, setRetryCount] = useState(0);
 
   // Fallback image for when all proxies fail
-  const fallbackImage = `${import.meta.env.VITE_SERVER_URL || "http://localhost:3001"}/fallback-images/fallback_1.jpg`;
+  const fallbackImage = "https://cdn.builder.io/api/v1/image/assets%2F5a34583df6fd4e4e8f252df17a4d0333%2F5a810b6046624480a2eb30416f8952db?format=webp&width=400";
 
   // Multiple proxy services for better reliability
   const getProxiedUrl = (originalUrl: string, attempt: number): string => {
