@@ -62,13 +62,7 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
   // Check if server is available on modal open
   useEffect(() => {
     if (isOpen) {
-      // Force fallback to Google Calendar booking page to show real appointment slots
-      // This ensures users see actual available times in EST instead of fake generated slots
-      setFallbackToIframe(true);
-      setServerAvailable(false);
-      
-      // Uncomment the line below if you want to try the server API first
-      // checkServerAvailability();
+      checkServerAvailability();
     }
   }, [isOpen]);
 

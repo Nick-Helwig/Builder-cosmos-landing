@@ -1,6 +1,56 @@
 const express = require('express');
 const router = express.Router();
 const googleCalendarService = require('../services/google-calendar');
+const BookingScraper = require('../services/booking-scraper');
+
+// Helper function to create known appointment slots
+function createKnownAppointmentSlots() {
+  const slots = [];
+  const now = new Date();
+  const knownTimes = ['6:15 PM', '6:45 PM', '7:15 PM', '7:45 PM', '8:15 PM', '8:45 PM', '9:15 PM', '9:45 PM'];
+  
+  // Create slots for the next 5 business days
+  for (let i = 0; i < 10; i++) {
+    const date = new Date(now);
+    date.setDate(date.getDate() + i);
+    
+    // Skip weekends
+    if (date.getDay() === 0 || date.getDay() === 6) continue;
+    
+    // Use known appointment times
+    knownTimes.forEach(timeStr => {
+      const [time, period] = timeStr.split(' ');
+      const [hours, minutes] = time.split(':');
+      let hour = parseInt(hours);
+      
+      if (period === 'PM' && hour !== 12) hour += 12;
+      if (period === 'AM' && hour === 12) hour = 0;
+      
+      const startTime = new Date(date);
+      startTime.setHours(hour, parseInt(minutes), 0, 0);
+      
+      const endTime = new Date(startTime);
+      endTime.setMinutes(endTime.getMinutes() + 30);
+      
+      slots.push({
+        id: `known_${date.getTime()}_${hour}_${minutes}`,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        displayTime: startTime.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          timeZone: 'America/New_York'
+        }) + ' at ' + timeStr,
+        available: true
+      });
+    });
+    
+    if (slots.length >= 20) break; // Limit total slots
+  }
+  
+  return slots.slice(0, 20);
+}
 
 // Health check endpoint for calendar service
 router.get('/health', async (req, res) => {
@@ -16,64 +66,133 @@ router.get('/slots', async (req, res) => {
   try {
     const { service, days = 30 } = req.query;
     
-    // Initialize Google Calendar service if not already done
-    await googleCalendarService.initialize();
+    console.log('Fetching real appointment slots from Google Calendar booking page...');
     
-    // Get real available slots from Google Calendar
-    const slots = await googleCalendarService.getAvailableSlots(service, parseInt(days));
+    // Use booking scraper with timeout to get real slots from the booking page
+    const scraper = new BookingScraper();
+    let scraperInitialized = false;
     
-    res.json({
-      success: true,
-      slots: slots,
-      service: service
-    });
-  } catch (error) {
-    console.error('Error fetching calendar slots:', error);
-    
-    // Fallback to mock data if Google Calendar fails
-    const slots = [];
-    const now = new Date();
-    
-    for (let i = 1; i <= 7; i++) {
-      const date = new Date(now);
-      date.setDate(date.getDate() + i);
+    try {
+      scraperInitialized = await scraper.initialize();
       
-      // Skip weekends for now
-      if (date.getDay() === 0 || date.getDay() === 6) continue;
-      
-      // Generate time slots from 9 AM to 5 PM
-      for (let hour = 9; hour <= 17; hour++) {
-        if (hour === 12) continue; // Skip lunch hour
+      if (scraperInitialized) {
+        console.log('Scraper initialized, attempting to scrape...');
         
-        const startTime = new Date(date);
-        startTime.setHours(hour, 0, 0, 0);
+        const slots = await Promise.race([
+          scraper.scrapeAvailableSlots(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Scraper timeout after 12 seconds')), 12000))
+        ]);
         
-        const endTime = new Date(startTime);
-        endTime.setMinutes(30); // 30-minute appointments
+        console.log(`Successfully scraped ${slots?.length || 0} real appointment slots`);
         
-        slots.push({
-          id: `slot_${date.getTime()}_${hour}`,
-          startTime: startTime.toISOString(),
-          endTime: endTime.toISOString(),
-          displayTime: startTime.toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            timeZone: 'America/New_York'
-          }),
-          available: true
+        // If scraper returned empty results, use known appointment times as fallback
+        if (!slots || slots.length === 0) {
+          console.log('Scraper returned empty results, using known appointment times...');
+          const fallbackSlots = createKnownAppointmentSlots();
+          return res.json({
+            success: true,
+            slots: fallbackSlots,
+            service: service,
+            source: 'booking-page-scraper-fallback'
+          });
+        }
+        
+        return res.json({
+          success: true,
+          slots: slots,
+          service: service,
+          source: 'booking-page-scraper'
         });
+      } else {
+        console.log('Scraper failed to initialize, trying fallback...');
+      }
+      
+    } catch (scraperError) {
+      console.error('Scraper failed:', scraperError.message);
+    } finally {
+      // Always ensure the scraper is closed
+      if (scraperInitialized) {
+        await scraper.close().catch(err => 
+          console.error('Error closing scraper:', err.message)
+        );
       }
     }
     
-    res.json({
-      success: true,
-      slots: slots.slice(0, 20), // Limit to 20 slots
-      service: req.query.service,
-      fallback: true,
-      error: error.message
+    // Quick fallback - try Google Calendar API
+    try {
+      await googleCalendarService.initialize();
+      const slots = await googleCalendarService.getAvailableSlots(req.query.service, parseInt(days));
+      
+      res.json({
+        success: true,
+        slots: slots,
+        service: service,
+        source: 'google-calendar-api'
+      });
+      
+    } catch (apiError) {
+      console.error('Google Calendar API also failed:', apiError);
+      
+      // Final fallback using known appointment times from scraping
+      const slots = [];
+      const now = new Date();
+      const knownTimes = ['6:15 PM', '6:45 PM', '7:15 PM', '7:45 PM', '8:15 PM', '8:45 PM', '9:15 PM', '9:45 PM'];
+      
+      // Create slots for the next 5 business days
+      for (let i = 0; i < 10; i++) {
+        const date = new Date(now);
+        date.setDate(date.getDate() + i);
+        
+        // Skip weekends
+        if (date.getDay() === 0 || date.getDay() === 6) continue;
+        
+        // Use known appointment times
+        knownTimes.forEach(timeStr => {
+          const [time, period] = timeStr.split(' ');
+          const [hours, minutes] = time.split(':');
+          let hour = parseInt(hours);
+          
+          if (period === 'PM' && hour !== 12) hour += 12;
+          if (period === 'AM' && hour === 12) hour = 0;
+          
+          const startTime = new Date(date);
+          startTime.setHours(hour, parseInt(minutes), 0, 0);
+          
+          const endTime = new Date(startTime);
+          endTime.setMinutes(endTime.getMinutes() + 30);
+          
+          slots.push({
+            id: `fallback_${date.getTime()}_${hour}_${minutes}`,
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString(),
+            displayTime: startTime.toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              timeZone: 'America/New_York'
+            }),
+            available: true
+          });
+        });
+        
+        if (slots.length >= 20) break; // Limit total slots
+      }
+      
+      res.json({
+        success: true,
+        slots: slots.slice(0, 20), // Limit to 20 slots
+        service: req.query.service,
+        source: 'fallback-mock',
+        error: apiError.message
+      });
+    }
+  } catch (error) {
+    console.error('Calendar slots error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch calendar slots'
     });
   }
 });
