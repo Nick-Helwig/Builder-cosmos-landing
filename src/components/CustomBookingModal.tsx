@@ -39,6 +39,8 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
   });
   const [error, setError] = useState("");
   const [bookingResult, setBookingResult] = useState<any>(null);
+  const [serverAvailable, setServerAvailable] = useState(false);
+  const [fallbackToIframe, setFallbackToIframe] = useState(false);
 
   const services = [
     { name: "Premium Haircut", price: "$35", duration: "30 min" },
@@ -49,6 +51,44 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
 
   const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
 
+  // Check if server is available on modal open
+  useEffect(() => {
+    if (isOpen) {
+      checkServerAvailability();
+    }
+  }, [isOpen]);
+
+  const checkServerAvailability = async () => {
+    // Skip server check if no server URL is configured for production
+    if (!import.meta.env.VITE_SERVER_URL && typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      console.log("No calendar server configured for production, using fallback");
+      setServerAvailable(false);
+      setFallbackToIframe(true);
+      return;
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      const response = await fetch(`${serverUrl}/api/calendar/health`, {
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' },
+      });
+
+      clearTimeout(timeoutId);
+      setServerAvailable(response.ok);
+
+      if (!response.ok) {
+        setFallbackToIframe(true);
+      }
+    } catch (error) {
+      console.log("Calendar server not available, using fallback");
+      setServerAvailable(false);
+      setFallbackToIframe(true);
+    }
+  };
+
   // Fetch available slots when service is selected
   useEffect(() => {
     if (selectedService && step === 2) {
@@ -57,20 +97,31 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
   }, [selectedService, step]);
 
   const fetchAvailableSlots = async () => {
+    if (!serverAvailable) {
+      setFallbackToIframe(true);
+      return;
+    }
+
     setLoading(true);
     setError("");
-    
+
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       const response = await fetch(
-        `${serverUrl}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`
+        `${serverUrl}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`,
+        { signal: controller.signal }
       );
-      
+
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
         throw new Error(`Failed to fetch slots: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setSlots(data.slots);
       } else {
@@ -78,7 +129,7 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
       }
     } catch (error) {
       console.error("Error fetching slots:", error);
-      setError("Unable to load available times. Please try again later.");
+      setFallbackToIframe(true);
     } finally {
       setLoading(false);
     }
@@ -142,6 +193,8 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
     setError("");
     setBookingResult(null);
     setSlots([]);
+    setFallbackToIframe(false);
+    setServerAvailable(false);
   };
 
   const handleClose = () => {
@@ -164,19 +217,43 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className={fallbackToIframe ? "max-w-4xl w-full max-h-[95vh] p-0 flex flex-col" : "max-w-2xl w-full max-h-[90vh] overflow-y-auto"}>
+        <DialogHeader className={fallbackToIframe ? "p-6 pb-4 flex-shrink-0" : ""}>
           <DialogTitle className="text-2xl font-semibold text-barber-900 flex items-center gap-2">
             <Calendar className="h-6 w-6" />
             Book Your Appointment
           </DialogTitle>
           <DialogDescription>
-            {step === 1 && "Choose your service"}
-            {step === 2 && "Select your preferred time"}
-            {step === 3 && "Enter your information"}
-            {step === 4 && "Booking confirmed!"}
+            {fallbackToIframe ? "Select your preferred time and date from our available slots below." : (
+              <>
+                {step === 1 && "Choose your service"}
+                {step === 2 && "Select your preferred time"}
+                {step === 3 && "Enter your information"}
+                {step === 4 && "Booking confirmed!"}
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Fallback to Google Calendar iframe when server is unavailable */}
+        {fallbackToIframe && (
+          <div className="flex-1 px-6 pb-6 min-h-0">
+            <div className="w-full h-full rounded-lg overflow-auto border border-barber-200">
+              <iframe
+                src="https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1N1ExrZA16pettGJBFNzDAUjYvxr4vwtXSD4VsdvhTy81VLXrBiEhIluJX-8E3w9RBbD3fRBhJ?ctz=America/New_York"
+                className="w-full h-[600px] min-h-[600px]"
+                style={{ border: 0 }}
+                frameBorder="0"
+                scrolling="yes"
+                title="Book Appointment"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Custom booking interface when server is available */}
+        {!fallbackToIframe && (
+          <div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
@@ -367,11 +444,11 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            
+
             <h3 className="text-xl font-semibold text-barber-900">
               Appointment Booked Successfully!
             </h3>
-            
+
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <p className="text-green-800 text-sm">
                 Your appointment has been confirmed and added to our calendar.
@@ -403,6 +480,8 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
             </Button>
           </div>
         )}
+
+        )} {/* Close custom booking interface wrapper */}
       </DialogContent>
     </Dialog>
   );
