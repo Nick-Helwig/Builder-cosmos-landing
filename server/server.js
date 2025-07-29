@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs-extra");
 const cron = require("node-cron");
 const instagramCache = require("./services/instagram-cache");
+const calendarRoutes = require("./routes/calendar");
 require("dotenv").config();
 
 const app = express();
@@ -25,6 +26,9 @@ app.use(
   "/fallback-images",
   express.static(path.join(__dirname, "public/fallback-images")),
 );
+
+// Calendar API routes
+app.use("/api/calendar", calendarRoutes);
 
 // API Routes
 app.get("/api/instagram/posts", async (req, res) => {
