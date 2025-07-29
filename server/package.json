@@ -10,18 +10,25 @@
     "setup:fallbacks": "node scripts/download-fallbacks.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "node-cron": "^3.0.3",
     "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "fs-extra": "^11.2.0",
-    "sharp": "^0.33.1",
-    "dotenv": "^16.3.1"
+    "googleapis": "^154.1.0",
+    "moment-timezone": "^0.6.0",
+    "node-cron": "^3.0.3",
+    "sharp": "^0.33.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   },
-  "keywords": ["barbershop", "instagram", "caching", "node.js"],
+  "keywords": [
+    "barbershop",
+    "instagram",
+    "caching",
+    "node.js"
+  ],
   "author": "Nick Helwig",
   "license": "MIT"
 }
