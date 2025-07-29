@@ -62,42 +62,39 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
   // Check if server is available on modal open
   useEffect(() => {
     if (isOpen) {
-      checkServerAvailability();
+      // Force fallback to Google Calendar booking page to show real appointment slots
+      // This ensures users see actual available times in EST instead of fake generated slots
+      setFallbackToIframe(true);
+      setServerAvailable(false);
+      
+      // Uncomment the line below if you want to try the server API first
+      // checkServerAvailability();
     }
   }, [isOpen]);
 
   const checkServerAvailability = async () => {
-    // Skip server check if no server URL is configured for production
-    if (
-      !import.meta.env.VITE_SERVER_URL &&
-      typeof window !== "undefined" &&
-      window.location.hostname !== "localhost"
-    ) {
-      console.log(
-        "No calendar server configured for production, using fallback",
-      );
-      setServerAvailable(false);
-      setFallbackToIframe(true);
-      return;
-    }
-
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout
 
       const response = await fetch(`${serverUrl}/api/calendar/health`, {
         signal: controller.signal,
         headers: { Accept: "application/json" },
+        mode: 'cors', // Ensure CORS is handled properly
       });
 
       clearTimeout(timeoutId);
       setServerAvailable(response.ok);
 
       if (!response.ok) {
+        console.log("Calendar server health check failed, using fallback. Status:", response.status);
         setFallbackToIframe(true);
+      } else {
+        console.log("Calendar server is available at:", serverUrl);
+        setFallbackToIframe(false);
       }
     } catch (error) {
-      console.log("Calendar server not available, using fallback");
+      console.log("Calendar server not available, using fallback. Server URL:", serverUrl, "Error:", error);
       setServerAvailable(false);
       setFallbackToIframe(true);
     }
@@ -244,7 +241,7 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
             </DialogTitle>
             <DialogDescription className="text-barber-600">
               Select your preferred time and date from our available slots
-              below.
+              below. All times are displayed in Eastern Time (EST/EDT).
             </DialogDescription>
           </DialogHeader>
 
