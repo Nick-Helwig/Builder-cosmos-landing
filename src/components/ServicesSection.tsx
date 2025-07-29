@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Scissors, Users, Home, Phone } from "lucide-react";
 import { useState } from "react";
-import BookingModal from "./BookingModal";
+import CustomBookingModal from "./CustomBookingModal";
 
 const ServicesSection = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -167,7 +167,7 @@ const ServicesSection = () => {
         </div>
       </div>
 
-      <BookingModal
+      <CustomBookingModal
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
       />

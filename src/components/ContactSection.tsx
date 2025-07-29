@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Phone, Calendar } from "lucide-react";
 import { useState } from "react";
-import BookingModal from "./BookingModal";
+import CustomBookingModal from "./CustomBookingModal";
 
 const ContactSection = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -142,7 +142,7 @@ const ContactSection = () => {
         </div>
       </div>
 
-      <BookingModal
+      <CustomBookingModal
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
       />

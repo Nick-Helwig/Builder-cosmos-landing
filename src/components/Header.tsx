@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Scissors, Menu, X } from "lucide-react";
 import { useState } from "react";
-import BookingModal from "./BookingModal";
+import CustomBookingModal from "./CustomBookingModal";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -103,7 +103,7 @@ const Header = () => {
         </div>
       )}
 
-      <BookingModal
+      <CustomBookingModal
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
       />
