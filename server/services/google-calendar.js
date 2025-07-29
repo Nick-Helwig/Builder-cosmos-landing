@@ -1,11 +1,11 @@
-const { google } = require('googleapis');
-const moment = require('moment-timezone');
+const { google } = require("googleapis");
+const moment = require("moment-timezone");
 
 class GoogleCalendarService {
   constructor() {
     this.calendar = null;
-    this.calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
-    this.timezone = 'America/New_York'; // Force EST timezone
+    this.calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
+    this.timezone = "America/New_York"; // Force EST timezone
   }
 
   // Initialize Google Calendar API with service account or OAuth
@@ -13,23 +13,25 @@ class GoogleCalendarService {
     try {
       // Using service account (recommended for server-to-server)
       if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
-        const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
-        
+        const serviceAccount = JSON.parse(
+          process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
+        );
+
         const auth = new google.auth.GoogleAuth({
           credentials: serviceAccount,
-          scopes: ['https://www.googleapis.com/auth/calendar'],
+          scopes: ["https://www.googleapis.com/auth/calendar"],
         });
 
-        this.calendar = google.calendar({ version: 'v3', auth });
-        console.log('Google Calendar API initialized with service account');
+        this.calendar = google.calendar({ version: "v3", auth });
+        console.log("Google Calendar API initialized with service account");
         return true;
       }
-      
+
       // Fallback to OAuth (requires user consent)
       const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI
+        process.env.GOOGLE_REDIRECT_URI,
       );
 
       // Set credentials if refresh token exists
@@ -37,29 +39,32 @@ class GoogleCalendarService {
         oauth2Client.setCredentials({
           refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
         });
-        
-        this.calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-        console.log('Google Calendar API initialized with OAuth');
+
+        this.calendar = google.calendar({ version: "v3", auth: oauth2Client });
+        console.log("Google Calendar API initialized with OAuth");
         return true;
       }
 
-      console.error('No Google Calendar credentials configured');
+      console.error("No Google Calendar credentials configured");
       return false;
     } catch (error) {
-      console.error('Failed to initialize Google Calendar API:', error);
+      console.error("Failed to initialize Google Calendar API:", error);
       return false;
     }
   }
 
   // Get available time slots for the next 30 days
-  async getAvailableSlots(serviceType = 'Premium Haircut', daysAhead = 30) {
+  async getAvailableSlots(serviceType = "Premium Haircut", daysAhead = 30) {
     try {
       if (!this.calendar) {
-        throw new Error('Google Calendar API not initialized');
+        throw new Error("Google Calendar API not initialized");
       }
 
-      const startDate = moment().tz(this.timezone).startOf('day');
-      const endDate = moment().tz(this.timezone).add(daysAhead, 'days').endOf('day');
+      const startDate = moment().tz(this.timezone).startOf("day");
+      const endDate = moment()
+        .tz(this.timezone)
+        .add(daysAhead, "days")
+        .endOf("day");
 
       // Get existing events to find busy times
       const busyTimes = await this.calendar.events.list({
@@ -67,7 +72,7 @@ class GoogleCalendarService {
         timeMin: startDate.toISOString(),
         timeMax: endDate.toISOString(),
         singleEvents: true,
-        orderBy: 'startTime',
+        orderBy: "startTime",
       });
 
       // Generate available slots based on business hours
@@ -75,12 +80,12 @@ class GoogleCalendarService {
         startDate,
         endDate,
         busyTimes.data.items || [],
-        serviceType
+        serviceType,
       );
 
       return availableSlots;
     } catch (error) {
-      console.error('Error fetching available slots:', error);
+      console.error("Error fetching available slots:", error);
       throw error;
     }
   }
@@ -89,31 +94,36 @@ class GoogleCalendarService {
   generateAvailableSlots(startDate, endDate, busyEvents, serviceType) {
     const slots = [];
     const serviceDuration = this.getServiceDuration(serviceType);
-    
+
     // Business hours configuration
     const businessHours = {
-      monday: { start: 9, end: 19 },    // 9 AM - 7 PM
+      monday: { start: 9, end: 19 }, // 9 AM - 7 PM
       tuesday: { start: 9, end: 19 },
       wednesday: { start: 9, end: 19 },
       thursday: { start: 9, end: 19 },
       friday: { start: 9, end: 19 },
-      saturday: { start: 8, end: 18 },  // 8 AM - 6 PM
-      sunday: { start: 10, end: 16 },   // 10 AM - 4 PM
+      saturday: { start: 8, end: 18 }, // 8 AM - 6 PM
+      sunday: { start: 10, end: 16 }, // 10 AM - 4 PM
     };
 
     const current = startDate.clone();
-    
+
     while (current.isBefore(endDate)) {
-      const dayName = current.format('dddd').toLowerCase();
+      const dayName = current.format("dddd").toLowerCase();
       const hours = businessHours[dayName];
-      
+
       if (hours && !this.isHoliday(current)) {
         // Generate slots for this day
-        const daySlots = this.generateDaySlots(current, hours, serviceDuration, busyEvents);
+        const daySlots = this.generateDaySlots(
+          current,
+          hours,
+          serviceDuration,
+          busyEvents,
+        );
         slots.push(...daySlots);
       }
-      
-      current.add(1, 'day');
+
+      current.add(1, "day");
     }
 
     return slots.slice(0, 50); // Limit to 50 slots for performance
@@ -123,48 +133,55 @@ class GoogleCalendarService {
   generateDaySlots(date, businessHours, serviceDuration, busyEvents) {
     const slots = [];
     const slotInterval = 30; // 30-minute intervals
-    
-    let currentTime = date.clone().hour(businessHours.start).minute(0).second(0);
+
+    let currentTime = date
+      .clone()
+      .hour(businessHours.start)
+      .minute(0)
+      .second(0);
     const endTime = date.clone().hour(businessHours.end).minute(0).second(0);
-    
-    while (currentTime.clone().add(serviceDuration, 'minutes').isSameOrBefore(endTime)) {
-      const slotEnd = currentTime.clone().add(serviceDuration, 'minutes');
-      
+
+    while (
+      currentTime
+        .clone()
+        .add(serviceDuration, "minutes")
+        .isSameOrBefore(endTime)
+    ) {
+      const slotEnd = currentTime.clone().add(serviceDuration, "minutes");
+
       // Check if this slot conflicts with existing appointments
-      const isAvailable = !busyEvents.some(event => {
+      const isAvailable = !busyEvents.some((event) => {
         const eventStart = moment(event.start.dateTime || event.start.date);
         const eventEnd = moment(event.end.dateTime || event.end.date);
-        
-        return (
-          currentTime.isBefore(eventEnd) && slotEnd.isAfter(eventStart)
-        );
+
+        return currentTime.isBefore(eventEnd) && slotEnd.isAfter(eventStart);
       });
-      
+
       if (isAvailable && currentTime.isAfter(moment())) {
         slots.push({
-          id: `${currentTime.format('YYYY-MM-DD-HH-mm')}`,
+          id: `${currentTime.format("YYYY-MM-DD-HH-mm")}`,
           startTime: currentTime.clone().toISOString(),
           endTime: slotEnd.toISOString(),
-          displayTime: currentTime.format('dddd, MMMM Do YYYY [at] h:mm A'),
+          displayTime: currentTime.format("dddd, MMMM Do YYYY [at] h:mm A"),
           available: true,
         });
       }
-      
-      currentTime.add(slotInterval, 'minutes');
+
+      currentTime.add(slotInterval, "minutes");
     }
-    
+
     return slots;
   }
 
   // Get service duration in minutes
   getServiceDuration(serviceType) {
     const durations = {
-      'Premium Haircut': 30,
-      'Basic Kids Cut': 30,
-      'House Call Service': 30,
-      'Same Day Appointment': 30,
+      "Premium Haircut": 30,
+      "Basic Kids Cut": 30,
+      "House Call Service": 30,
+      "Same Day Appointment": 30,
     };
-    
+
     return durations[serviceType] || 30;
   }
 
@@ -172,19 +189,19 @@ class GoogleCalendarService {
   isHoliday(date) {
     // Add your holiday logic here
     const holidays = [
-      '2024-12-25', // Christmas
-      '2024-01-01', // New Year
+      "2024-12-25", // Christmas
+      "2024-01-01", // New Year
       // Add more holidays as needed
     ];
-    
-    return holidays.includes(date.format('YYYY-MM-DD'));
+
+    return holidays.includes(date.format("YYYY-MM-DD"));
   }
 
   // Create a new appointment
   async createAppointment(appointmentData) {
     try {
       if (!this.calendar) {
-        throw new Error('Google Calendar API not initialized');
+        throw new Error("Google Calendar API not initialized");
       }
 
       const startTime = moment(appointmentData.startTime).tz(this.timezone);
@@ -210,8 +227,8 @@ class GoogleCalendarService {
         reminders: {
           useDefault: false,
           overrides: [
-            { method: 'email', minutes: 24 * 60 }, // 24 hours before
-            { method: 'popup', minutes: 60 },      // 1 hour before
+            { method: "email", minutes: 24 * 60 }, // 24 hours before
+            { method: "popup", minutes: 60 }, // 1 hour before
           ],
         },
       };
@@ -219,10 +236,10 @@ class GoogleCalendarService {
       const response = await this.calendar.events.insert({
         calendarId: this.calendarId,
         resource: event,
-        sendUpdates: 'all', // Send email notifications
+        sendUpdates: "all", // Send email notifications
       });
 
-      console.log('Appointment created successfully:', response.data.id);
+      console.log("Appointment created successfully:", response.data.id);
       return {
         success: true,
         eventId: response.data.id,
@@ -231,7 +248,7 @@ class GoogleCalendarService {
         endTime: response.data.end.dateTime,
       };
     } catch (error) {
-      console.error('Error creating appointment:', error);
+      console.error("Error creating appointment:", error);
       throw error;
     }
   }
@@ -243,8 +260,8 @@ Appointment Details:
 - Service: ${appointmentData.serviceType}
 - Customer: ${appointmentData.customerName}
 - Email: ${appointmentData.customerEmail}
-- Phone: ${appointmentData.customerPhone || 'Not provided'}
-- Notes: ${appointmentData.notes || 'None'}
+- Phone: ${appointmentData.customerPhone || "Not provided"}
+- Notes: ${appointmentData.notes || "None"}
 
 Booked via: Booknow.Hair website
     `.trim();
@@ -255,13 +272,13 @@ Booked via: Booknow.Hair website
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI
+      process.env.GOOGLE_REDIRECT_URI,
     );
 
-    const scopes = ['https://www.googleapis.com/auth/calendar'];
-    
+    const scopes = ["https://www.googleapis.com/auth/calendar"];
+
     return oauth2Client.generateAuthUrl({
-      access_type: 'offline',
+      access_type: "offline",
       scope: scopes,
     });
   }

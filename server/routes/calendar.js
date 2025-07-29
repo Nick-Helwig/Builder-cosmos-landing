@@ -1,33 +1,36 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const googleCalendar = require('../services/google-calendar');
+const googleCalendar = require("../services/google-calendar");
 
 // Get available appointment slots
-router.get('/slots', async (req, res) => {
+router.get("/slots", async (req, res) => {
   try {
-    const serviceType = req.query.service || 'Premium Haircut';
+    const serviceType = req.query.service || "Premium Haircut";
     const daysAhead = parseInt(req.query.days) || 30;
 
-    const slots = await googleCalendar.getAvailableSlots(serviceType, daysAhead);
+    const slots = await googleCalendar.getAvailableSlots(
+      serviceType,
+      daysAhead,
+    );
 
     res.json({
       success: true,
       slots,
-      timezone: 'America/New_York',
+      timezone: "America/New_York",
       count: slots.length,
     });
   } catch (error) {
-    console.error('Error fetching calendar slots:', error);
+    console.error("Error fetching calendar slots:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch available slots',
+      error: "Failed to fetch available slots",
       message: error.message,
     });
   }
 });
 
 // Create new appointment
-router.post('/book', async (req, res) => {
+router.post("/book", async (req, res) => {
   try {
     const {
       slotId,
@@ -41,11 +44,23 @@ router.post('/book', async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!startTime || !endTime || !serviceType || !customerName || !customerEmail) {
+    if (
+      !startTime ||
+      !endTime ||
+      !serviceType ||
+      !customerName ||
+      !customerEmail
+    ) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields',
-        required: ['startTime', 'endTime', 'serviceType', 'customerName', 'customerEmail'],
+        error: "Missing required fields",
+        required: [
+          "startTime",
+          "endTime",
+          "serviceType",
+          "customerName",
+          "customerEmail",
+        ],
       });
     }
 
@@ -54,7 +69,7 @@ router.post('/book', async (req, res) => {
     if (!emailRegex.test(customerEmail)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid email format',
+        error: "Invalid email format",
       });
     }
 
@@ -73,50 +88,52 @@ router.post('/book', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Appointment booked successfully!',
+      message: "Appointment booked successfully!",
       appointment: result,
     });
   } catch (error) {
-    console.error('Error booking appointment:', error);
+    console.error("Error booking appointment:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to book appointment',
+      error: "Failed to book appointment",
       message: error.message,
     });
   }
 });
 
 // Get OAuth authorization URL (for setup)
-router.get('/auth-url', (req, res) => {
+router.get("/auth-url", (req, res) => {
   try {
     const authUrl = googleCalendar.getAuthUrl();
     res.json({
       success: true,
       authUrl,
-      message: 'Visit this URL to authorize calendar access',
+      message: "Visit this URL to authorize calendar access",
     });
   } catch (error) {
-    console.error('Error generating auth URL:', error);
+    console.error("Error generating auth URL:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to generate authorization URL',
+      error: "Failed to generate authorization URL",
     });
   }
 });
 
 // Health check for calendar API
-router.get('/health', async (req, res) => {
+router.get("/health", async (req, res) => {
   try {
     const initialized = await googleCalendar.initialize();
     res.json({
       success: initialized,
-      message: initialized ? 'Calendar API ready' : 'Calendar API not configured',
-      timezone: 'America/New_York',
+      message: initialized
+        ? "Calendar API ready"
+        : "Calendar API not configured",
+      timezone: "America/New_York",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Calendar API health check failed',
+      error: "Calendar API health check failed",
       message: error.message,
     });
   }

@@ -10,7 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, User, Mail, Phone, CheckCircle, Loader2 } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  User,
+  Mail,
+  Phone,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 
 interface TimeSlot {
   id: string;
@@ -60,8 +68,14 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
 
   const checkServerAvailability = async () => {
     // Skip server check if no server URL is configured for production
-    if (!import.meta.env.VITE_SERVER_URL && typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-      console.log("No calendar server configured for production, using fallback");
+    if (
+      !import.meta.env.VITE_SERVER_URL &&
+      typeof window !== "undefined" &&
+      window.location.hostname !== "localhost"
+    ) {
+      console.log(
+        "No calendar server configured for production, using fallback",
+      );
       setServerAvailable(false);
       setFallbackToIframe(true);
       return;
@@ -73,12 +87,12 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
 
       const response = await fetch(`${serverUrl}/api/calendar/health`, {
         signal: controller.signal,
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: "application/json" },
       });
 
       clearTimeout(timeoutId);
       setServerAvailable(response.ok);
-      
+
       if (!response.ok) {
         setFallbackToIframe(true);
       }
@@ -104,24 +118,24 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
 
     setLoading(true);
     setError("");
-    
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(
         `${serverUrl}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`,
-        { signal: controller.signal }
+        { signal: controller.signal },
       );
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch slots: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setSlots(data.slots);
       } else {
@@ -229,7 +243,8 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
               Book Your Appointment
             </DialogTitle>
             <DialogDescription className="text-barber-600">
-              Select your preferred time and date from our available slots below.
+              Select your preferred time and date from our available slots
+              below.
             </DialogDescription>
           </DialogHeader>
 
@@ -276,7 +291,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
         {/* Step 1: Service Selection */}
         {step === 1 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-barber-900">Select a Service</h3>
+            <h3 className="text-lg font-semibold text-barber-900">
+              Select a Service
+            </h3>
             <div className="grid gap-3">
               {services.map((service, index) => (
                 <button
@@ -286,10 +303,16 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h4 className="font-medium text-barber-900">{service.name}</h4>
-                      <p className="text-sm text-barber-600">{service.duration}</p>
+                      <h4 className="font-medium text-barber-900">
+                        {service.name}
+                      </h4>
+                      <p className="text-sm text-barber-600">
+                        {service.duration}
+                      </p>
                     </div>
-                    <span className="text-lg font-semibold text-barber-900">{service.price}</span>
+                    <span className="text-lg font-semibold text-barber-900">
+                      {service.price}
+                    </span>
                   </div>
                 </button>
               ))}
@@ -315,13 +338,16 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
             </div>
 
             <p className="text-sm text-barber-600">
-              All times shown in Eastern Time. Select your preferred appointment time:
+              All times shown in Eastern Time. Select your preferred appointment
+              time:
             </p>
 
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-barber-600" />
-                <span className="ml-2 text-barber-600">Loading available times...</span>
+                <span className="ml-2 text-barber-600">
+                  Loading available times...
+                </span>
               </div>
             ) : slots.length > 0 ? (
               <div className="grid gap-2 max-h-64 overflow-y-auto">
@@ -340,7 +366,10 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
               <div className="text-center py-8 text-barber-600">
                 <Calendar className="h-12 w-12 mx-auto mb-2 text-barber-300" />
                 <p>No available times found.</p>
-                <p className="text-sm">Please try selecting a different service or contact us directly.</p>
+                <p className="text-sm">
+                  Please try selecting a different service or contact us
+                  directly.
+                </p>
               </div>
             )}
           </div>
@@ -350,7 +379,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
         {step === 3 && selectedSlot && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-barber-900">Your Information</h3>
+              <h3 className="text-lg font-semibold text-barber-900">
+                Your Information
+              </h3>
               <Button
                 variant="outline"
                 size="sm"
@@ -362,7 +393,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
             </div>
 
             <div className="bg-barber-50 rounded-lg p-4 mb-6">
-              <h4 className="font-medium text-barber-900 mb-2">Appointment Summary</h4>
+              <h4 className="font-medium text-barber-900 mb-2">
+                Appointment Summary
+              </h4>
               <p className="text-sm text-barber-600">
                 <strong>Service:</strong> {selectedService}
               </p>
@@ -379,7 +412,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
                 <Input
                   id="name"
                   value={customerInfo.name}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                  onChange={(e) =>
+                    setCustomerInfo({ ...customerInfo, name: e.target.value })
+                  }
                   placeholder="Enter your full name"
                   className="mt-1"
                   required
@@ -394,7 +429,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
                   id="email"
                   type="email"
                   value={customerInfo.email}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                  onChange={(e) =>
+                    setCustomerInfo({ ...customerInfo, email: e.target.value })
+                  }
                   placeholder="Enter your email address"
                   className="mt-1"
                   required
@@ -409,7 +446,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
                   id="phone"
                   type="tel"
                   value={customerInfo.phone}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                  onChange={(e) =>
+                    setCustomerInfo({ ...customerInfo, phone: e.target.value })
+                  }
                   placeholder="Enter your phone number"
                   className="mt-1"
                 />
@@ -422,7 +461,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
                 <Textarea
                   id="notes"
                   value={customerInfo.notes}
-                  onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })}
+                  onChange={(e) =>
+                    setCustomerInfo({ ...customerInfo, notes: e.target.value })
+                  }
                   placeholder="Any special requests or additional information..."
                   className="mt-1"
                   rows={3}
@@ -456,11 +497,11 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            
+
             <h3 className="text-xl font-semibold text-barber-900">
               Appointment Booked Successfully!
             </h3>
-            
+
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <p className="text-green-800 text-sm">
                 Your appointment has been confirmed and added to our calendar.
@@ -469,12 +510,15 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
             </div>
 
             <div className="text-left bg-barber-50 rounded-lg p-4 space-y-2">
-              <h4 className="font-medium text-barber-900">Appointment Details:</h4>
+              <h4 className="font-medium text-barber-900">
+                Appointment Details:
+              </h4>
               <p className="text-sm text-barber-600">
                 <strong>Service:</strong> {selectedService}
               </p>
               <p className="text-sm text-barber-600">
-                <strong>Date & Time:</strong> {selectedSlot && formatDateTime(selectedSlot.startTime)}
+                <strong>Date & Time:</strong>{" "}
+                {selectedSlot && formatDateTime(selectedSlot.startTime)}
               </p>
               <p className="text-sm text-barber-600">
                 <strong>Name:</strong> {customerInfo.name}
