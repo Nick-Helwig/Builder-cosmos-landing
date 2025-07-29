@@ -481,7 +481,7 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
           </div>
         )}
 
-        )} {/* Close custom booking interface wrapper */}
+        ) /* Close custom booking interface wrapper */}
       </DialogContent>
     </Dialog>
   );
