@@ -51,7 +51,8 @@ jobs:
           scp -o StrictHostKeyChecking=no -r server/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/server/
           
           echo "Installing backend dependencies on VPS..."
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production"
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && set -x && timeout 300 npm install --production 2>&1 | tee npm_install_log.txt"
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cat /var/www/booknow.hair/server/npm_install_log.txt"
 
           echo "Restarting/Starting backend server on VPS..."
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && pm2 restart booknow-hair-server || pm2 start server.js --name booknow-hair-server"
