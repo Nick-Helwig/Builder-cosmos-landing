@@ -64,8 +64,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && pm2 restart booknow-hair-server || pm2 start server.js --name booknow-hair-server"
           
           echo "Configuring Nginx..."
-          scp -o StrictHostKeyChecking=no nginx/booknow.hair-http $SSH_USER@$SSH_HOST:/tmp/booknow.hair-nginx.conf
-          scp -o StrictHostKeyChecking=no nginx/booknow.hair $SSH_USER@$SSH_HOST:/tmp/booknow.hair-https-nginx.conf
+          scp -o StrictHostKeyChecking=no nginx/booknow.hair $SSH_USER@$SSH_HOST:/tmp/booknow.hair-nginx.conf
           scp -o StrictHostKeyChecking=no deploy-nginx.sh $SSH_USER@$SSH_HOST:/tmp/deploy-nginx.sh
           scp -o StrictHostKeyChecking=no setup-ssl.sh $SSH_USER@$SSH_HOST:/tmp/setup-ssl.sh
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "chmod +x /tmp/deploy-nginx.sh && /tmp/deploy-nginx.sh"
