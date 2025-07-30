@@ -48,7 +48,8 @@ jobs:
 
           echo "Deploying backend..."
           ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/server"
-          scp -o StrictHostKeyChecking=no -r server/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/server/
+          # Exclude node_modules from scp as it can be very large and should be installed on the server
+          scp -o StrictHostKeyChecking=no -r server/index.js server/package.json server/package-lock.json server/README.md server/public server/routes server/scripts server/services server/server.js server/start.js $SSH_USER@$SSH_HOST:/var/www/booknow.hair/server/
           
           echo "Installing backend dependencies on VPS..."
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && set -x && npm install --production"
