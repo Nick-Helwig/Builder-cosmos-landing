@@ -45,9 +45,10 @@ jobs:
         scp -o StrictHostKeyChecking=no -r dist/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/html/
 
         echo "Deploying backend..."
+        ls -la server/ # Debug: List local server directory contents
         ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/server"
-        scp -o StrictHostKeyChecking=no -r server/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/server/
-        ssh $SSH_USER@$SSH_HOST "ls -la /var/www/booknow.hair/server"
+        scp -o StrictHostKeyChecking=no -r server $SSH_USER@$SSH_HOST:/var/www/booknow.hair/ # Copy entire server directory
+        ssh $SSH_USER@$SSH_HOST "ls -la /var/www/booknow.hair/server" # Debug: List remote server directory contents
         ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production && pm2 restart booknow-hair-server"
 
         echo "Reloading Nginx..."
