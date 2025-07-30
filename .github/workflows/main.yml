@@ -10,49 +10,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up SSH Agent
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up SSH Agent
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-    - name: Install frontend dependencies
-      run: npm install
+      - name: Install frontend dependencies
+        run: npm install
 
-    - name: Build frontend
-      run: npm run build
+      - name: Build frontend
+        run: npm run build
 
-    - name: Install backend dependencies
-      run: npm install --prefix server
+      - name: Install backend dependencies
+        run: npm install --prefix server
 
-    - name: Deploy to VPS
-      env:
-        SSH_HOST: 104.223.123.201
-        SSH_USER: root
-      run: |
-        set -x
-        ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
-        ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/html"
-        
-        echo "Deploying frontend..."
-        scp -o StrictHostKeyChecking=no -r dist/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/html/
+      - name: Deploy to VPS
+        env:
+          SSH_HOST: 104.223.123.201
+          SSH_USER: root
+        run: |
+          set -x
+          
+          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+          
+          ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/html"
+          
+          echo "Deploying frontend..."
+          scp -o StrictHostKeyChecking=no -r dist/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/html/
 
-        echo "Deploying backend..."
-        ls -la server/ # Debug: List local server directory contents
-        ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/server"
-        scp -o StrictHostKeyChecking=no -r server $SSH_USER@$SSH_HOST:/var/www/booknow.hair/ # Copy entire server directory
-        ssh $SSH_USER@$SSH_HOST "ls -la /var/www/booknow.hair/server" # Debug: List remote server directory contents
-        ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production && pm2 restart booknow-hair-server"
+          echo "Deploying backend..."
+          ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/server"
+          scp -o StrictHostKeyChecking=no -r server/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/server/
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production && pm2 restart booknow-hair-server || pm2 start server.js --name booknow-hair-server"
 
-        echo "Configuring Nginx..."
-        NGINX_CONFIG="
+          echo "Configuring Nginx..."
+          NGINX_CONFIG=$(cat <<'EOF'
 server {
     listen 80;
     server_name booknow.hair 104.223.123.201;
@@ -60,21 +60,22 @@ server {
     location /api/ {
         proxy_pass http://localhost:3001;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
     }
 
     location / {
         root /var/www/booknow.hair/html;
         index index.html index.htm;
-        try_files \$uri \$uri/ /index.html;
+        try_files $uri $uri/ /index.html;
     }
 }
-"
-        ssh $SSH_USER@$SSH_HOST "echo \"$NGINX_CONFIG\" | sudo tee /etc/nginx/sites-available/booknow-hair"
-        ssh $SSH_USER@$SSH_HOST "sudo ln -sf /etc/nginx/sites-available/booknow-hair /etc/nginx/sites-enabled/booknow-hair"
-        ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "sudo nginx -t && sudo systemctl reload nginx"
+EOF
+)
+          ssh $SSH_USER@$SSH_HOST "echo \"$NGINX_CONFIG\" | sudo tee /etc/nginx/sites-available/booknow-hair"
+          ssh $SSH_USER@$SSH_HOST "sudo ln -sf /etc/nginx/sites-available/booknow-hair /etc/nginx/sites-enabled/booknow-hair"
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "sudo nginx -t && sudo systemctl reload nginx"
 
-        echo "Deployment complete."
+          echo "Deployment complete."
