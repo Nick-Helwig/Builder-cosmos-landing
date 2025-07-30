@@ -57,3 +57,4 @@ jobs:
           scp -o StrictHostKeyChecking=no deploy-nginx.sh $SSH_USER@$SSH_HOST:/tmp/deploy-nginx.sh
           scp -o StrictHostKeyChecking=no setup-ssl.sh $SSH_USER@$SSH_HOST:/tmp/setup-ssl.sh
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "chmod +x /tmp/deploy-nginx.sh && /tmp/deploy-nginx.sh"
+          # Triggering a new workflow run after adding deploy-nginx.sh and setup-ssl.sh to git
