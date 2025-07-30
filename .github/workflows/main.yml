@@ -49,7 +49,12 @@ jobs:
           echo "Deploying backend..."
           ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/server"
           scp -o StrictHostKeyChecking=no -r server/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/server/
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production && pm2 restart booknow-hair-server || pm2 start server.js --name booknow-hair-server"
+          
+          echo "Installing backend dependencies on VPS..."
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production"
+
+          echo "Restarting/Starting backend server on VPS..."
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && pm2 restart booknow-hair-server || pm2 start server.js --name booknow-hair-server"
           
           echo "Configuring Nginx..."
           scp -o StrictHostKeyChecking=no nginx/booknow.hair-http $SSH_USER@$SSH_HOST:/tmp/booknow.hair-nginx.conf
