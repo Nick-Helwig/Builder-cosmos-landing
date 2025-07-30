@@ -44,7 +44,9 @@ jobs:
         scp -o StrictHostKeyChecking=no -r dist/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/html/
 
         echo "Deploying backend..."
-        ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && git pull origin main && npm install --production && pm2 restart booknow-hair-server"
+        ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/server"
+        scp -o StrictHostKeyChecking=no -r server/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/server/
+        ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production && pm2 restart booknow-hair-server"
 
         echo "Reloading Nginx..."
         ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "sudo nginx -t && sudo systemctl reload nginx"
