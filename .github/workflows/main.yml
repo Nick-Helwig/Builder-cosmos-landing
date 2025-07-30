@@ -37,6 +37,7 @@ jobs:
         SSH_HOST: 104.223.123.201
         SSH_USER: root
       run: |
+        set -x
         ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
         ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/html"
         
@@ -46,6 +47,7 @@ jobs:
         echo "Deploying backend..."
         ssh $SSH_USER@$SSH_HOST "sudo mkdir -p /var/www/booknow.hair/server"
         scp -o StrictHostKeyChecking=no -r server/* $SSH_USER@$SSH_HOST:/var/www/booknow.hair/server/
+        ssh $SSH_USER@$SSH_HOST "ls -la /var/www/booknow.hair/server"
         ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production && pm2 restart booknow-hair-server"
 
         echo "Reloading Nginx..."
