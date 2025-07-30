@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const googleCalendarService = require('../services/google-calendar');
 const BookingScraper = require('../services/booking-scraper');
 
 // Helper function to create known appointment slots
@@ -118,76 +117,14 @@ router.get('/slots', async (req, res) => {
       }
     }
     
-    // Quick fallback - try Google Calendar API
-    try {
-      await googleCalendarService.initialize();
-      const slots = await googleCalendarService.getAvailableSlots(req.query.service, parseInt(days));
-      
-      res.json({
-        success: true,
-        slots: slots,
-        service: service,
-        source: 'google-calendar-api'
-      });
-      
-    } catch (apiError) {
-      console.error('Google Calendar API also failed:', apiError);
-      
-      // Final fallback using known appointment times from scraping
-      const slots = [];
-      const now = new Date();
-      const knownTimes = ['6:15 PM', '6:45 PM', '7:15 PM', '7:45 PM', '8:15 PM', '8:45 PM', '9:15 PM', '9:45 PM'];
-      
-      // Create slots for the next 5 business days
-      for (let i = 0; i < 10; i++) {
-        const date = new Date(now);
-        date.setDate(date.getDate() + i);
-        
-        // Skip weekends
-        if (date.getDay() === 0 || date.getDay() === 6) continue;
-        
-        // Use known appointment times
-        knownTimes.forEach(timeStr => {
-          const [time, period] = timeStr.split(' ');
-          const [hours, minutes] = time.split(':');
-          let hour = parseInt(hours);
-          
-          if (period === 'PM' && hour !== 12) hour += 12;
-          if (period === 'AM' && hour === 12) hour = 0;
-          
-          const startTime = new Date(date);
-          startTime.setHours(hour, parseInt(minutes), 0, 0);
-          
-          const endTime = new Date(startTime);
-          endTime.setMinutes(endTime.getMinutes() + 30);
-          
-          slots.push({
-            id: `fallback_${date.getTime()}_${hour}_${minutes}`,
-            startTime: startTime.toISOString(),
-            endTime: endTime.toISOString(),
-            displayTime: startTime.toLocaleDateString('en-US', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit',
-              timeZone: 'America/New_York'
-            }),
-            available: true
-          });
-        });
-        
-        if (slots.length >= 20) break; // Limit total slots
-      }
-      
-      res.json({
-        success: true,
-        slots: slots.slice(0, 20), // Limit to 20 slots
-        service: req.query.service,
-        source: 'fallback-mock',
-        error: apiError.message
-      });
-    }
+    // If all else fails, use known appointment times as a final fallback
+    const fallbackSlots = createKnownAppointmentSlots();
+    return res.json({
+      success: true,
+      slots: fallbackSlots,
+      service: service,
+      source: 'final-fallback-known-times'
+    });
   } catch (error) {
     console.error('Calendar slots error:', error);
     res.status(500).json({

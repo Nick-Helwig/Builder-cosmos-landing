@@ -51,7 +51,30 @@ jobs:
         ssh $SSH_USER@$SSH_HOST "ls -la /var/www/booknow.hair/server" # Debug: List remote server directory contents
         ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "cd /var/www/booknow.hair/server && npm install --production && pm2 restart booknow-hair-server"
 
-        echo "Reloading Nginx..."
+        echo "Configuring Nginx..."
+        NGINX_CONFIG="
+server {
+    listen 80;
+    server_name booknow.hair 104.223.123.201;
+
+    location /api/ {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+    }
+
+    location / {
+        root /var/www/booknow.hair/html;
+        index index.html index.htm;
+        try_files \$uri \$uri/ /index.html;
+    }
+}
+"
+        ssh $SSH_USER@$SSH_HOST "echo \"$NGINX_CONFIG\" | sudo tee /etc/nginx/sites-available/booknow-hair"
+        ssh $SSH_USER@$SSH_HOST "sudo ln -sf /etc/nginx/sites-available/booknow-hair /etc/nginx/sites-enabled/booknow-hair"
         ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "sudo nginx -t && sudo systemctl reload nginx"
 
         echo "Deployment complete."
