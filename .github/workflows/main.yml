@@ -66,7 +66,8 @@ jobs:
           SSH_USER: root
         run: |
           set -x
-          NGINX_CONFIG=$(cat <<'EOF'
+          # Define Nginx configuration content and write to a temporary file
+          cat > nginx_config_temp << 'EOF'
 server {
     listen 80;
     server_name booknow.hair 104.223.123.201;
@@ -90,7 +91,11 @@ server {
     }
 }
 EOF
-)
-          ssh $SSH_USER@$SSH_HOST "echo \"$NGINX_CONFIG\" | sudo tee /etc/nginx/sites-available/booknow-hair"
+
+          # Transfer the config file to the VPS
+          scp -o StrictHostKeyChecking=no nginx_config_temp $SSH_USER@$SSH_HOST:/tmp/booknow-hair-nginx
+
+          # Move the config file to the correct Nginx directory and enable it
+          ssh $SSH_USER@$SSH_HOST "sudo mv /tmp/booknow-hair-nginx /etc/nginx/sites-available/booknow-hair"
           ssh $SSH_USER@$SSH_HOST "sudo ln -sf /etc/nginx/sites-available/booknow-hair /etc/nginx/sites-enabled/booknow-hair"
           ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "sudo nginx -t && sudo systemctl reload nginx"
