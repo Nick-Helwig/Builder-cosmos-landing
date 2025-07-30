@@ -18,10 +18,11 @@
     "googleapis": "^154.1.0",
     "moment-timezone": "^0.6.0",
     "node-cron": "^3.0.3",
+    "puppeteer": "^24.15.0",
     "sharp": "^0.33.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.1.10"
   },
   "keywords": [
     "barbershop",
