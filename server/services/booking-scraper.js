@@ -28,7 +28,7 @@ class BookingScraper {
           '--disable-default-apps',
           '--memory-pressure-off'
         ],
-        timeout: 10000
+        timeout: 30000 // Increased timeout for browser launch
       });
       console.log('Booking scraper initialized');
       return true;
@@ -62,15 +62,24 @@ class BookingScraper {
       console.log('Loading Google Calendar booking page...');
       
       // Single attempt with better error handling
-      await page.goto(this.bookingUrl, { 
-        waitUntil: 'domcontentloaded',
-        timeout: 8000 
+      await page.goto(this.bookingUrl, {
+        waitUntil: 'networkidle0', // Wait until network is idle
+        timeout: 60000 // Increased timeout for page navigation to 60 seconds
       });
       
       console.log('Page loaded successfully');
       
+      // Save page HTML for debugging
+      const htmlContent = await page.content();
+      require('fs').writeFileSync('/tmp/booking_page.html', htmlContent);
+      console.log('Saved booking page HTML to /tmp/booking_page.html');
+
+      // Wait for a specific selector that indicates dynamic content is loaded
+      await page.waitForSelector('div[role="button"][data-time-key], div[aria-label*="time slot"], div.AqECfc[data-time]', { timeout: 15000 })
+        .catch(() => console.log('Time slot selector not found within 15 seconds.'));
+      
       // Wait for dynamic content
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Reduced wait time after selector found
       
       console.log('Extracting appointment slots...');
       
@@ -78,71 +87,85 @@ class BookingScraper {
       const slots = await page.evaluate(() => {
         const results = [];
         
-        // Look for time elements with various patterns
-        const timeElements = document.querySelectorAll('*');
-        const timePattern = /\b\d{1,2}:\d{2}\s*(AM|PM)\b/gi;
-        
-        timeElements.forEach(el => {
-          const text = el.textContent?.trim();
-          if (text && timePattern.test(text)) {
-            const timeMatch = text.match(timePattern);
-            if (timeMatch) {
-              timeMatch.forEach(time => {
-                // Try to find associated date information
-                let dateElement = el;
-                let dateFound = null;
-                
-                // Look for date data in parent elements
-                while (dateElement && !dateFound) {
-                  const dataDate = dateElement.getAttribute('data-date');
-                  if (dataDate) {
-                    dateFound = dataDate;
-                    break;
-                  }
-                  dateElement = dateElement.parentElement;
-                }
-                
-                // If no specific date found, try to get from calendar context
-                if (!dateFound) {
-                  // Look for the selected date in the calendar
-                  const selectedDate = document.querySelector('.selected, [aria-selected="true"], .DPvwYc');
-                  if (selectedDate) {
-                    const dateText = selectedDate.textContent?.trim();
-                    if (dateText && /^\d{1,2}$/.test(dateText)) {
-                      dateFound = dateText;
-                    }
-                  }
-                }
-                
-                results.push({
-                  time: time.trim(),
-                  date: dateFound,
-                  elementText: text,
-                  className: el.className
-                });
-              });
+        // More specific selectors for time slots based on common Google Calendar patterns
+        const timeSlotElements = document.querySelectorAll(
+          'div[role="button"][data-time-key], ' + // Primary time slot buttons
+          'div[aria-label*="time slot"], ' + // Elements explicitly labeled as time slots
+          'div.AqECfc[data-time]' // Another common pattern for time slots
+        );
+
+        console.log(`Found ${timeSlotElements.length} potential time slot elements.`);
+
+        timeSlotElements.forEach((el, index) => {
+          const timeText = el.textContent?.trim();
+          const dataTimeKey = el.getAttribute('data-time-key');
+          const dataTime = el.getAttribute('data-time');
+          const ariaLabel = el.getAttribute('aria-label');
+
+          let time = timeText || dataTimeKey || dataTime || ariaLabel;
+
+          if (time) {
+            // Try to find associated date information.
+            // Look for a parent element with a data-date attribute or a clear date text.
+            let dateElement = el;
+            let dateFound = null;
+            
+            // Traverse up to find a date associated with the time slot
+            while (dateElement && !dateFound && dateElement.tagName !== 'BODY') {
+              const dataDate = dateElement.getAttribute('data-date');
+              if (dataDate) {
+                dateFound = dataDate;
+                break;
+              }
+              // Look for date text in nearby elements, e.g., a header for the day
+              const siblingDateHeader = dateElement.previousElementSibling;
+              if (siblingDateHeader && /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\b/.test(siblingDateHeader.textContent?.trim())) {
+                dateFound = siblingDateHeader.textContent?.trim().match(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\b/)?.[0];
+                if (dateFound) break;
+              }
+              dateElement = dateElement.parentElement;
             }
+
+            // Fallback to current month/year context if no specific date found
+            if (!dateFound) {
+              const monthYearElement = document.querySelector('[aria-label*="2025"], .month-year, h2');
+              const currentContext = monthYearElement ? monthYearElement.textContent?.trim() : '';
+              if (currentContext && /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}/.test(currentContext)) {
+                dateFound = currentContext;
+              }
+            }
+            
+            results.push({
+              time: time.trim(),
+              date: dateFound,
+              elementText: timeText,
+              className: el.className,
+              dataTimeKey: dataTimeKey,
+              dataTime: dataTime,
+              ariaLabel: ariaLabel,
+              debugIndex: index // For debugging purposes
+            });
           }
         });
         
-        // Look for date elements and calendar context
-        const dateElements = document.querySelectorAll('[data-date]');
-        const availableDates = Array.from(dateElements).map(el => ({
-          date: el.getAttribute('data-date'),
+        // Also extract available dates from the calendar grid, if present
+        const availableDateElements = document.querySelectorAll('.calendar-day.available, [aria-label*="available"], [data-date]');
+        const availableDates = Array.from(availableDateElements).map(el => ({
+          date: el.getAttribute('data-date') || el.textContent?.trim(),
           className: el.className,
           isClickable: !el.classList.contains('disabled') && !el.classList.contains('P7rTif')
-        }));
+        })).filter(d => d.date); // Filter out null/empty dates
         
-        // Also try to get the current month/year context
+        // Get current month/year context for better date parsing
         const monthYearElement = document.querySelector('[aria-label*="2025"], .month-year, h2');
         const currentContext = monthYearElement ? monthYearElement.textContent?.trim() : '';
         
-        // Look for the currently selected date
+        // Get the currently selected date from the calendar
         const selectedDateElement = document.querySelector('.selected, [aria-selected="true"], .DPvwYc');
         const selectedDate = selectedDateElement ? selectedDateElement.textContent?.trim() : null;
         
-        return { 
-          timeSlots: results, 
+        return {
+          timeSlots: results,
           availableDates,
           currentContext,
           selectedDate

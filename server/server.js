@@ -16,12 +16,8 @@ app.use(express.json());
 app.use(express.static("public"));
 
 // Serve static files from the React frontend build directory
-app.use(express.static(path.join(__dirname, "../dist")));
-
-// For any other route, serve the index.html file from the React frontend
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../dist", "index.html"));
-});
+// Calendar API routes - MUST BE DEFINED BEFORE STATIC ASSETS
+app.use("/api/calendar", calendarRoutes);
 
 // Serve cached Instagram images
 app.use(
@@ -35,8 +31,13 @@ app.use(
   express.static(path.join(__dirname, "public/fallback-images")),
 );
 
-// Calendar API routes
-app.use("/api/calendar", calendarRoutes);
+// Serve static files from the React frontend build directory
+app.use(express.static(path.join(__dirname, "../dist")));
+
+// For any other route, serve the index.html file from the React frontend
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../dist", "index.html"));
+});
 
 // API Routes
 app.get("/api/instagram/posts", async (req, res) => {
