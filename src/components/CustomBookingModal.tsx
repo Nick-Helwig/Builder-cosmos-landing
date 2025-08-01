@@ -133,7 +133,7 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
     try {
       const controller = new AbortController();
       // allow more time for scraping path; 20s
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Reduced timeout to 15 seconds
 
       const url = `${apiBase}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`;
       console.log("CAL: fetching slots URL=", url);
@@ -166,9 +166,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
       }
     } catch (error) {
       console.error("CAL: error fetching slots:", error);
-      // Do NOT force iframe fallback here; show empty state and allow user to go back/change service
       setSlots([]);
       setError("Unable to load available times right now. Please try again or pick a different service.");
+      setFallbackToIframe(true); // Force iframe fallback on error
     } finally {
       setLoading(false);
     }

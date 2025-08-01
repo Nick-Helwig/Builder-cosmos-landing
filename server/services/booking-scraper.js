@@ -64,7 +64,7 @@ class BookingScraper {
       // Single attempt with better error handling
       await page.goto(this.bookingUrl, {
         waitUntil: 'networkidle0', // Wait until network is idle
-        timeout: 60000 // Increased timeout for page navigation to 60 seconds
+        timeout: 30000 // Reduced timeout for page navigation to 30 seconds
       });
       
       console.log('Page loaded successfully');
@@ -75,11 +75,11 @@ class BookingScraper {
       console.log('Saved booking page HTML to /tmp/booking_page.html');
 
       // Wait for a specific selector that indicates dynamic content is loaded
-      await page.waitForSelector('div[role="button"][data-time-key], div[aria-label*="time slot"], div.AqECfc[data-time], div[role="gridcell"] button, .w8Qjne', { timeout: 15000 })
-        .catch(() => console.log('Time slot selector not found within 15 seconds.'));
+      await page.waitForSelector('div[role="button"][data-time-key], div[aria-label*="time slot"], div.AqECfc[data-time], div[role="gridcell"] button, .w8Qjne', { timeout: 10000 })
+        .catch(() => console.log('Time slot selector not found within 10 seconds.'));
       
       // Wait for dynamic content
-      await new Promise(resolve => setTimeout(resolve, 8000)); // Increased wait time for dynamic content
+      await new Promise(resolve => setTimeout(resolve, 3000)); // Reduced wait time for dynamic content
       
       console.log('Extracting appointment slots...');
       
