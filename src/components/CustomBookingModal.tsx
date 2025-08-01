@@ -57,7 +57,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
     { name: "Same Day Appointment", price: "$65", duration: "30 min" },
   ];
 
-  const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3001";
+  // Use same-origin relative API paths so this works in production behind NGINX and locally via dev proxy.
+  // If you still want to override, set VITE_API_BASE to an absolute URL. Otherwise leave as '' for relative.
+  const apiBase = (import.meta as any).env?.VITE_API_BASE || "";
 
   // Check if server is available on modal open
   useEffect(() => {
@@ -71,10 +73,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout
 
-      const response = await fetch(`${serverUrl}/api/calendar/health`, {
+      const response = await fetch(`${apiBase}/api/calendar/health`, {
         signal: controller.signal,
-        headers: { Accept: "application/json" },
-        mode: 'cors', // Ensure CORS is handled properly
+        headers: { Accept: "application/json" }
       });
 
       clearTimeout(timeoutId);
@@ -84,11 +85,11 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
         console.log("Calendar server health check failed, using fallback. Status:", response.status);
         setFallbackToIframe(true);
       } else {
-        console.log("Calendar server is available at:", serverUrl);
+        console.log("Calendar server is available (same-origin)");
         setFallbackToIframe(false);
       }
     } catch (error) {
-      console.log("Calendar server not available, using fallback. Server URL:", serverUrl, "Error:", error);
+      console.log("Calendar server not available, using fallback. Error:", error);
       setServerAvailable(false);
       setFallbackToIframe(true);
     }
@@ -115,8 +116,8 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(
-        `${serverUrl}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`,
-        { signal: controller.signal },
+        `${apiBase}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`,
+        { signal: controller.signal }
       );
 
       clearTimeout(timeoutId);
@@ -161,7 +162,7 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
     setError("");
 
     try {
-      const response = await fetch(`${serverUrl}/api/calendar/book`, {
+      const response = await fetch(`${apiBase}/api/calendar/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
