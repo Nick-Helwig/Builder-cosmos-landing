@@ -135,8 +135,10 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
       // allow more time for scraping path; 20s
       const timeoutId = setTimeout(() => controller.abort(), 20000);
 
+      const url = `${apiBase}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`;
+      console.log("CAL: fetching slots URL=", url);
       const response = await fetch(
-        `${apiBase}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`,
+        url,
         { signal: controller.signal, headers: { Accept: "application/json" } }
       );
 
@@ -155,14 +157,15 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
       }
 
       if (data && data.success && Array.isArray(data.slots)) {
+        console.log("CAL: slots response success=", data.success, "count=", data.slots.length, "sample=", data.slots.slice(0,1));
         setSlots(data.slots);
       } else {
-        console.warn("Slots response did not include expected shape, showing empty state. Raw:", data);
+        console.warn("CAL: unexpected slots shape; success=", data?.success, "type(slots)=", typeof data?.slots, "raw=", data);
         setSlots([]);
         setError(typeof data?.message === "string" ? data.message : "No available times found.");
       }
     } catch (error) {
-      console.error("Error fetching slots:", error);
+      console.error("CAL: error fetching slots:", error);
       // Do NOT force iframe fallback here; show empty state and allow user to go back/change service
       setSlots([]);
       setError("Unable to load available times right now. Please try again or pick a different service.");

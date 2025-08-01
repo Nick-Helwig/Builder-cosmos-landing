@@ -152,13 +152,58 @@ async function getAvailableTimesHandler(req, res) {
   }
 }
 
-// /slots handler delegates to shared implementation
+/**
+ * Add no-store to avoid stale caches and allow simple debug diagnostics.
+ */
 router.get('/slots', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.query.debug === 'true') {
+    // Wrap original handler to inject diagnostics into the JSON body
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+      try {
+        const diag = {
+          diagnostics: {
+            service: body?.service || req.query.service || 'unknown',
+            source: body?.source || 'unknown',
+            count: Array.isArray(body?.slots) ? body.slots.length : 0,
+            sample: Array.isArray(body?.slots) && body.slots.length > 0 ? body.slots.slice(0, 2) : [],
+            now: new Date().toISOString(),
+            path: '/api/calendar/slots'
+          }
+        };
+        return originalJson({ ...body, ...diag });
+      } catch {
+        return originalJson(body);
+      }
+    };
+  }
   return getAvailableTimesHandler(req, res);
 });
 
 // Compatibility alias: /available-times -> uses same logic as /slots
 router.get('/available-times', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.query.debug === 'true') {
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+      try {
+        const diag = {
+          diagnostics: {
+            service: body?.service || req.query.service || 'unknown',
+            source: body?.source || 'unknown',
+            count: Array.isArray(body?.slots) ? body.slots.length : 0,
+            sample: Array.isArray(body?.slots) && body.slots.length > 0 ? body.slots.slice(0, 2) : [],
+            now: new Date().toISOString(),
+            path: '/api/calendar/available-times'
+          }
+        };
+        return originalJson({ ...body, ...diag });
+      } catch {
+        return originalJson(body);
+      }
+    };
+  }
   return getAvailableTimesHandler(req, res);
 });
 
