@@ -3,6 +3,8 @@ const router = express.Router();
 const BookingScraper = require('../services/booking-scraper');
 const googleCalendarService = require('../services/google-calendar');
 
+console.log('Calendar routes module loaded.');
+
 // Helper function to create known appointment slots
 function createKnownAppointmentSlots() {
   const slots = [];
@@ -80,7 +82,7 @@ router.get('/slots', async (req, res) => {
         
         const slots = await Promise.race([
           scraper.scrapeAvailableSlots(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Scraper timeout after 12 seconds')), 12000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Scraper timeout after 30 seconds')), 30000)) // Increased overall scraper timeout
         ]);
         
         console.log(`Successfully scraped ${slots?.length || 0} real appointment slots`);

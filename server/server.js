@@ -15,22 +15,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-// Serve cached Instagram images
-app.use(
-  "/api/instagram/images",
-  express.static(path.join(__dirname, "cache/images")),
-);
-
-// Serve fallback images
-app.use(
-  "/fallback-images",
-  express.static(path.join(__dirname, "public/fallback-images")),
-);
-
-// Calendar API routes
+// API Routes - MUST BE DEFINED BEFORE STATIC ASSETS AND CATCH-ALL
 app.use("/api/calendar", calendarRoutes);
 
-// API Routes
 app.get("/api/instagram/posts", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 6;
@@ -82,6 +69,18 @@ app.get("/api/health", (req, res) => {
     uptime: process.uptime(),
   });
 });
+
+// Serve cached Instagram images
+app.use(
+  "/api/instagram/images",
+  express.static(path.join(__dirname, "cache/images")),
+);
+
+// Serve fallback images
+app.use(
+  "/fallback-images",
+  express.static(path.join(__dirname, "public/fallback-images")),
+);
 
 // Serve static files from the React frontend build directory
 app.use(express.static(path.join(__dirname, "../dist")));
