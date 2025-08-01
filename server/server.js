@@ -15,14 +15,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-// Serve static files from the React frontend build directory
-app.use(express.static(path.join(__dirname, "../dist")));
-
-// For any other route, serve the index.html file from the React frontend
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../dist", "index.html"));
-});
-
 // Serve cached Instagram images
 app.use(
   "/api/instagram/images",
@@ -89,6 +81,14 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });
+});
+
+// Serve static files from the React frontend build directory
+app.use(express.static(path.join(__dirname, "../dist")));
+
+// For any other route, serve the index.html file from the React frontend (MUST BE LAST)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../dist", "index.html"));
 });
 
 // Schedule automatic cache updates every 6 hours

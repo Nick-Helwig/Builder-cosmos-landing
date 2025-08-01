@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const BookingScraper = require('../services/booking-scraper');
+const googleCalendarService = require('../services/google-calendar');
 
 // Helper function to create known appointment slots
 function createKnownAppointmentSlots() {
