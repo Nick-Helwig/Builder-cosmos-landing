@@ -75,11 +75,11 @@ class BookingScraper {
       console.log('Saved booking page HTML to /tmp/booking_page.html');
 
       // Wait for a specific selector that indicates dynamic content is loaded
-      await page.waitForSelector('div[role="button"][data-time-key], div[aria-label*="time slot"], div.AqECfc[data-time]', { timeout: 15000 })
+      await page.waitForSelector('div[role="button"][data-time-key], div[aria-label*="time slot"], div.AqECfc[data-time], div[role="gridcell"] button, .w8Qjne', { timeout: 15000 })
         .catch(() => console.log('Time slot selector not found within 15 seconds.'));
       
       // Wait for dynamic content
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Reduced wait time after selector found
+      await new Promise(resolve => setTimeout(resolve, 8000)); // Increased wait time for dynamic content
       
       console.log('Extracting appointment slots...');
       
@@ -87,11 +87,17 @@ class BookingScraper {
       const slots = await page.evaluate(() => {
         const results = [];
         
-        // More specific selectors for time slots based on common Google Calendar patterns
+        // More comprehensive selectors for time slots based on common Google Calendar patterns
         const timeSlotElements = document.querySelectorAll(
           'div[role="button"][data-time-key], ' + // Primary time slot buttons
           'div[aria-label*="time slot"], ' + // Elements explicitly labeled as time slots
-          'div.AqECfc[data-time]' // Another common pattern for time slots
+          'div.AqECfc[data-time], ' + // Another common pattern for time slots
+          'div[role="gridcell"] button, ' + // Calendar grid cells with buttons
+          '.w8Qjne, ' + // Google Calendar time slot class
+          'div[data-time], ' + // Elements with data-time attribute
+          'button[data-time], ' + // Buttons with data-time attribute
+          '.fUzQHe, ' + // Another potential time slot class
+          'div[role="button"]:not([disabled])' // Clickable buttons that aren't disabled
         );
 
         console.log(`Found ${timeSlotElements.length} potential time slot elements.`);
@@ -105,6 +111,9 @@ class BookingScraper {
           let time = timeText || dataTimeKey || dataTime || ariaLabel;
 
           if (time) {
+            // Clean up time string
+            time = time.trim().replace(/\s+/g, ' ');
+            
             // Try to find associated date information.
             // Look for a parent element with a data-date attribute or a clear date text.
             let dateElement = el;
@@ -136,14 +145,16 @@ class BookingScraper {
             }
             
             results.push({
-              time: time.trim(),
+              time: time,
               date: dateFound,
               elementText: timeText,
               className: el.className,
               dataTimeKey: dataTimeKey,
               dataTime: dataTime,
               ariaLabel: ariaLabel,
-              debugIndex: index // For debugging purposes
+              debugIndex: index, // For debugging purposes
+              hasTime: /\d{1,2}:\d{2}\s*(AM|PM|am|pm)/i.test(time),
+              hasDate: /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/i.test(time)
             });
           }
         });
@@ -217,6 +228,18 @@ class BookingScraper {
     console.log('Current context:', currentContext);
     console.log('Selected date:', selectedDate);
     
+    // Debug: Log time slot quality
+    const timeSlotsWithTime = timeSlots.filter(slot => slot.hasTime);
+    const timeSlotsWithDate = timeSlots.filter(slot => slot.hasDate);
+    console.log(`Time slots with time: ${timeSlotsWithTime.length}/${timeSlots.length}`);
+    console.log(`Time slots with date: ${timeSlotsWithDate.length}/${timeSlots.length}`);
+    console.log('Sample time slots:', timeSlots.slice(0, 3).map(slot => ({
+      time: slot.time,
+      hasTime: slot.hasTime,
+      hasDate: slot.hasDate,
+      elementText: slot.elementText
+    })));
+    
     // If we have times but no specific dates, or if the dates look problematic, 
     // just use upcoming business days with the scraped times
     if (uniqueTimes.length > 0) {
@@ -264,12 +287,21 @@ class BookingScraper {
             slotDate = now.clone();
           }
           
-          // Parse time
-          const timeParts = time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-          if (timeParts) {
-            let hour = parseInt(timeParts[1]);
-            const minute = parseInt(timeParts[2]);
-            const period = timeParts[3].toUpperCase();
+          // Parse time - handle multiple formats
+          let timeMatch = time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+          
+          // Try alternative time formats
+          if (!timeMatch) {
+            timeMatch = time.match(/(\d{1,2})\s*(AM|PM)/i);
+          }
+          if (!timeMatch) {
+            timeMatch = time.match(/(\d{1,2}):(\d{2})/i);
+          }
+          
+          if (timeMatch) {
+            let hour = parseInt(timeMatch[1]) || 9; // Default to 9 AM if parsing fails
+            const minute = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
+            const period = timeMatch[3] ? timeMatch[3].toUpperCase() : 'AM';
             
             // Convert to 24-hour format
             if (period === 'PM' && hour !== 12) {
@@ -277,6 +309,10 @@ class BookingScraper {
             } else if (period === 'AM' && hour === 12) {
               hour = 0;
             }
+            
+            // Ensure hour is within business hours
+            if (hour < 6) hour = 9; // Earliest business hour
+            if (hour > 21) hour = 18; // Latest business hour
             
             const startTime = slotDate.clone().hour(hour).minute(minute).second(0);
             const endTime = startTime.clone().add(30, 'minutes'); // 30-minute appointments
@@ -289,6 +325,8 @@ class BookingScraper {
               available: true,
               source: 'scraped'
             });
+          } else {
+            console.log(`Could not parse time from: ${time}`);
           }
         } catch (error) {
           console.error('Error formatting slot:', error.message);
