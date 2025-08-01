@@ -230,31 +230,32 @@ class InstagramCache {
     const fallbackPosts = [];
 
     for (let i = 1; i <= 6; i++) {
+      const shortcode = `fallback${i}`;
       fallbackPosts.push({
         id: `fallback_${i}`,
-        shortcode: `fallback${i}`,
+        shortcode: shortcode,
         display_url: "", // No URL needed for fallback
         caption: `Professional barbering service - Style ${i}`,
         permalink: "https://instagram.com/booknow.hair/",
         timestamp: Date.now() / 1000,
-        filename: `instagram_${i}.jpg`,
+        filename: `${shortcode}.jpg`, // Use shortcode for unique filename
       });
     }
 
     // Copy fallback images to cache directory
     try {
-      for (let i = 1; i <= 6; i++) {
+      for (const post of fallbackPosts) {
         const sourcePath = path.join(
           __dirname,
-          `../public/fallback-images/fallback_${i}.jpg`,
+          `../public/fallback-images/fallback_${post.shortcode.replace('fallback', '')}.jpg`,
         );
-        const targetPath = path.join(this.imagesDir, `instagram_${i}.jpg`);
+        const targetPath = path.join(this.imagesDir, post.filename);
 
         if (await fs.pathExists(sourcePath)) {
           await fs.copy(sourcePath, targetPath);
         } else {
           // If a specific fallback image is missing, create a placeholder
-          await this.createPlaceholderImage(targetPath, `fallback_${i}`);
+          await this.createPlaceholderImage(targetPath, post.id);
         }
       }
     } catch (error) {
