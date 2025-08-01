@@ -71,9 +71,11 @@ app.get("/api/health", (req, res) => {
 });
 
 // Serve cached Instagram images
+const instagramImagesPath = path.join(__dirname, "cache/images");
+console.log(`Serving Instagram images from: ${instagramImagesPath}`); // Added log
 app.use(
   "/api/instagram/images",
-  express.static(path.join(__dirname, "cache/images")),
+  express.static(instagramImagesPath),
 );
 
 // Serve fallback images
