@@ -55,6 +55,10 @@ echo "🔐 Setting permissions..."
 sudo chown -R www-data:www-data /var/www/booknow.hair/html
 sudo chmod -R 755 /var/www/booknow.hair/html
 
+# Set proper permissions for Instagram cache directory
+sudo chown -R www-data:www-data /var/www/booknow.hair/server/cache/images
+sudo chmod -R 755 /var/www/booknow.hair/server/cache/images
+
 # Start and enable Nginx
 echo "🚀 Starting Nginx..."
 sudo systemctl start nginx
