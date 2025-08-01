@@ -58,8 +58,7 @@ server {
     
     # Serve Instagram images directly from Nginx cache directory using root and rewrite
     location /api/instagram/images/ {
-        root /var/www/booknow.hair/server/cache/;
-        rewrite ^/api/instagram/images/(.*)$ /images/$1 break;
+        alias /var/www/booknow.hair/server/cache/images/;
         expires 1y;
         add_header Cache-Control "public, immutable";
         try_files $uri =404;
