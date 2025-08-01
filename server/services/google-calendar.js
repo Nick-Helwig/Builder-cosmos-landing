@@ -13,20 +13,50 @@ class GoogleCalendarService {
     try {
       // Using service account (recommended for server-to-server)
       if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
-        const serviceAccount = JSON.parse(
-          process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
-        );
+        console.log("DEBUG: Attempting to initialize Google Calendar API with service account");
+        
+        let serviceAccount;
+        try {
+          serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+          console.log("DEBUG: Service account JSON parsed successfully, project_id:", serviceAccount.project_id);
+        } catch (parseError) {
+          console.error("DEBUG: Failed to parse GOOGLE_SERVICE_ACCOUNT_KEY JSON:", parseError.message);
+          throw parseError;
+        }
+
         // Decode the base64 private key
-        serviceAccount.private_key = Buffer.from(serviceAccount.private_key_base64, 'base64').toString('ascii');
-        delete serviceAccount.private_key_base64; // Remove the base64 field
+        try {
+          if (!serviceAccount.private_key_base64) {
+            throw new Error("private_key_base64 field missing from service account");
+          }
+          serviceAccount.private_key = Buffer.from(serviceAccount.private_key_base64, 'base64').toString('ascii');
+          delete serviceAccount.private_key_base64; // Remove the base64 field
+          console.log("DEBUG: Private key decoded successfully, length:", serviceAccount.private_key.length);
+        } catch (keyError) {
+          console.error("DEBUG: Failed to decode private key:", keyError.message);
+          throw keyError;
+        }
 
         const auth = new google.auth.GoogleAuth({
           credentials: serviceAccount,
           scopes: ["https://www.googleapis.com/auth/calendar"],
         });
 
+        console.log("DEBUG: GoogleAuth object created, attempting to initialize calendar client");
         this.calendar = google.calendar({ version: "v3", auth });
-        console.log("Google Calendar API initialized with service account");
+        
+        // Test the authentication by making a simple API call
+        try {
+          const testResponse = await this.calendar.calendarList.list();
+          console.log("DEBUG: Calendar API test successful, found", testResponse.data.items?.length || 0, "calendars");
+          console.log("DEBUG: Available calendars:", testResponse.data.items?.map(cal => ({ id: cal.id, summary: cal.summary })));
+        } catch (testError) {
+          console.error("DEBUG: Calendar API test failed:", testError.message);
+          console.error("DEBUG: Error details:", testError.response?.data || testError);
+          throw testError;
+        }
+
+        console.log("Google Calendar API initialized with service account successfully");
         return true;
       }
 
