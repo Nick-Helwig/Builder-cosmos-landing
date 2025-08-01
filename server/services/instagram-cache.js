@@ -243,20 +243,18 @@ class InstagramCache {
 
     // Copy fallback images to cache directory
     try {
-      const fallbackImagePath = path.join(
-        __dirname,
-        "../fallback-images/sample.jpg",
-      );
+      for (let i = 1; i <= 6; i++) {
+        const sourcePath = path.join(
+          __dirname,
+          `../public/fallback-images/fallback_${i}.jpg`,
+        );
+        const targetPath = path.join(this.imagesDir, `instagram_${i}.jpg`);
 
-      for (const post of fallbackPosts) {
-        const targetPath = path.join(this.imagesDir, post.filename);
-
-        // Check if fallback image exists, if not create a simple colored rectangle
-        if (await fs.pathExists(fallbackImagePath)) {
-          await fs.copy(fallbackImagePath, targetPath);
+        if (await fs.pathExists(sourcePath)) {
+          await fs.copy(sourcePath, targetPath);
         } else {
-          // Create a simple placeholder image
-          await this.createPlaceholderImage(targetPath, post.id);
+          // If a specific fallback image is missing, create a placeholder
+          await this.createPlaceholderImage(targetPath, `fallback_${i}`);
         }
       }
     } catch (error) {
