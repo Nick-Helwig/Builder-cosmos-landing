@@ -69,7 +69,11 @@ app.get("/api/health", (req, res) => {
     uptime: process.uptime(),
   });
 });
-
+// Serve Instagram cached images
+app.use(
+  "/api/instagram/images",
+  express.static(path.join(__dirname, "cache/images")),
+);
 
 // Serve fallback images
 app.use(
