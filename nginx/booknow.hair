@@ -56,12 +56,13 @@ server {
         application/atom+xml
         image/svg+xml;
     
-    # Serve Instagram images directly from Nginx cache directory
+    # Serve Instagram images directly from Nginx cache directory using root and rewrite
     location /api/instagram/images/ {
-        alias /var/www/booknow.hair/server/cache/images/;
+        root /var/www/booknow.hair/server/cache/;
+        rewrite ^/api/instagram/images/(.*)$ /images/$1 break;
         expires 1y;
         add_header Cache-Control "public, immutable";
-        try_files $uri $uri/ =404;
+        try_files $uri =404;
     }
 
     # General API Routes - Proxy to Node.js backend

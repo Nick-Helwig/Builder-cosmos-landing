@@ -101,7 +101,7 @@ class InstagramCache {
             caption: node.edge_media_to_caption?.edges?.[0]?.node?.text || "",
             permalink: `https://instagram.com/p/${node.shortcode}/`,
             timestamp: node.taken_at_timestamp,
-            filename: `instagram_${index + 1}.jpg`,
+            filename: `${node.shortcode}.jpg`,
           };
         });
 
@@ -238,7 +238,7 @@ class InstagramCache {
         caption: `Professional barbering service - Style ${i}`,
         permalink: "https://instagram.com/booknow.hair/",
         timestamp: Date.now() / 1000,
-        filename: `${shortcode}.jpg`, // Use shortcode for unique filename
+        filename: `${shortcode}.jpg`,
       });
     }
 
@@ -247,7 +247,7 @@ class InstagramCache {
       for (const post of fallbackPosts) {
         const sourcePath = path.join(
           __dirname,
-          `../public/fallback-images/fallback_${post.shortcode.replace('fallback', '')}.jpg`,
+          `../public/fallback-images/${post.filename}`,
         );
         const targetPath = path.join(this.imagesDir, post.filename);
 
