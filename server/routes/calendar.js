@@ -66,11 +66,34 @@ router.get('/health', async (req, res) => {
 // Shared implementation for fetching available slots (extracted from /slots)
 async function getAvailableTimesHandler(req, res) {
   try {
-    const { service, days = 30 } = req.query;
+    const { service = 'Premium Haircut', days = 30 } = req.query;
 
-    console.log('Fetching real appointment slots from Google Calendar booking page...');
+    // 1) Try primary: Google Calendar API if credentials are configured
+    let usedPrimary = false;
+    try {
+      const initialized = await googleCalendarService.initialize();
+      if (initialized) {
+        const slots = await googleCalendarService.getAvailableSlots(service, Number(days));
+        if (Array.isArray(slots) && slots.length > 0) {
+          console.log(`Returning ${slots.length} slots from google-calendar service`);
+          return res.json({
+            success: true,
+            slots,
+            service,
+            source: 'google-calendar-api'
+          });
+        }
+        usedPrimary = true;
+        console.warn('Google Calendar returned no slots, falling back to scraper...');
+      } else {
+        console.warn('Google Calendar not initialized, falling back to scraper...');
+      }
+    } catch (gcErr) {
+    console.error('Google Calendar primary flow failed, falling back:', gcErr?.message || gcErr);
+    }
 
-    // Use booking scraper with timeout to get real slots from the booking page
+    console.log('Fetching appointment slots via booking page scraper...');
+    // 2) Secondary: Booking page scraper with timeout
     const scraper = new BookingScraper();
     let scraperInitialized = false;
 
@@ -82,37 +105,29 @@ async function getAvailableTimesHandler(req, res) {
 
         const slots = await Promise.race([
           scraper.scrapeAvailableSlots(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Scraper timeout after 30 seconds')), 30000)) // Increased overall scraper timeout
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Scraper timeout after 30 seconds')), 30000)
+          )
         ]);
 
-        console.log(`Successfully scraped ${slots?.length || 0} real appointment slots`);
+        console.log(`Successfully scraped ${slots?.length || 0} appointment slots`);
 
-        // If scraper returned empty results, use known appointment times as fallback
-        if (!slots || slots.length === 0) {
-          console.log('Scraper returned empty results, using known appointment times...');
-          const fallbackSlots = createKnownAppointmentSlots();
+        if (Array.isArray(slots) && slots.length > 0) {
           return res.json({
             success: true,
-            slots: fallbackSlots,
-            service: service,
-            source: 'booking-page-scraper-fallback'
+            slots,
+            service,
+            source: 'booking-page-scraper'
           });
         }
 
-        return res.json({
-          success: true,
-          slots: slots,
-          service: service,
-          source: 'booking-page-scraper'
-        });
+        console.log('Scraper returned empty results, using known appointment times...');
       } else {
-        console.log('Scraper failed to initialize, trying fallback...');
+        console.log('Scraper failed to initialize, trying known-times fallback...');
       }
-
     } catch (scraperError) {
       console.error('Scraper failed:', scraperError.message);
     } finally {
-      // Always ensure the scraper is closed
       if (scraperInitialized) {
         await scraper.close().catch(err =>
           console.error('Error closing scraper:', err.message)
@@ -120,13 +135,13 @@ async function getAvailableTimesHandler(req, res) {
       }
     }
 
-    // If all else fails, use known appointment times as a final fallback
+    // 3) Final fallback: known times
     const fallbackSlots = createKnownAppointmentSlots();
     return res.json({
       success: true,
       slots: fallbackSlots,
-      service: service,
-      source: 'final-fallback-known-times'
+      service,
+      source: usedPrimary ? 'google-then-known-times-fallback' : 'final-fallback-known-times'
     });
   } catch (error) {
     console.error('Calendar slots error:', error);
@@ -171,8 +186,9 @@ router.post('/book', async (req, res) => {
     
     try {
       // Initialize Google Calendar service if not already done
-      await googleCalendarService.initialize();
-      
+      const initialized = await googleCalendarService.initialize();
+      if (!initialized) throw new Error('Google Calendar not configured');
+
       // Create the appointment in Google Calendar
       const appointmentResult = await googleCalendarService.createAppointment({
         startTime,
