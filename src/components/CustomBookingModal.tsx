@@ -69,27 +69,46 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
   }, [isOpen]);
 
   const checkServerAvailability = async () => {
-    try {
+    // health check with extended timeout and single retry to avoid premature fallback
+    const attempt = async (ms: number) => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout
+      const timer = setTimeout(() => controller.abort(), ms);
+      try {
+        const resp = await fetch(`${apiBase}/api/calendar/health`, {
+          signal: controller.signal,
+          headers: { Accept: "application/json" }
+        });
+        clearTimeout(timer);
+        return resp;
+      } catch (e) {
+        clearTimeout(timer);
+        throw e;
+      }
+    };
 
-      const response = await fetch(`${apiBase}/api/calendar/health`, {
-        signal: controller.signal,
-        headers: { Accept: "application/json" }
-      });
-
-      clearTimeout(timeoutId);
-      setServerAvailable(response.ok);
-
+    try {
+      // First attempt with 10s
+      let response = await attempt(10000);
       if (!response.ok) {
-        console.log("Calendar server health check failed, using fallback. Status:", response.status);
+        // Quick retry once (2s)
+        try {
+          response = await attempt(2000);
+        } catch (_) {
+          // ignore
+        }
+      }
+
+      setServerAvailable(!!response && response.ok);
+
+      if (!response || !response.ok) {
+        console.log("Calendar server health check failed, using fallback. Status:", response?.status);
         setFallbackToIframe(true);
       } else {
         console.log("Calendar server is available (same-origin)");
         setFallbackToIframe(false);
       }
     } catch (error) {
-      console.log("Calendar server not available, using fallback. Error:", error);
+      console.log("Calendar server not available after retries, using fallback. Error:", error);
       setServerAvailable(false);
       setFallbackToIframe(true);
     }
@@ -113,29 +132,40 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      // allow more time for scraping path; 20s
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
 
       const response = await fetch(
         `${apiBase}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`,
-        { signal: controller.signal }
+        { signal: controller.signal, headers: { Accept: "application/json" } }
       );
 
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch slots: ${response.status}`);
+        const text = await response.text().catch(() => "");
+        throw new Error(`Failed to fetch slots: ${response.status} ${text}`);
       }
 
-      const data = await response.json();
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        throw new Error(`Invalid JSON from slots endpoint: ${String(jsonErr)}`);
+      }
 
-      if (data.success) {
+      if (data && data.success && Array.isArray(data.slots)) {
         setSlots(data.slots);
       } else {
-        throw new Error(data.error || "Failed to load available slots");
+        console.warn("Slots response did not include expected shape, showing empty state. Raw:", data);
+        setSlots([]);
+        setError(typeof data?.message === "string" ? data.message : "No available times found.");
       }
     } catch (error) {
       console.error("Error fetching slots:", error);
-      setFallbackToIframe(true);
+      // Do NOT force iframe fallback here; show empty state and allow user to go back/change service
+      setSlots([]);
+      setError("Unable to load available times right now. Please try again or pick a different service.");
     } finally {
       setLoading(false);
     }
