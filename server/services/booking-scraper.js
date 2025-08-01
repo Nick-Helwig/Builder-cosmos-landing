@@ -87,28 +87,43 @@ class BookingScraper {
       const slots = await page.evaluate(() => {
         const results = [];
         
-        // More comprehensive selectors for time slots based on common Google Calendar patterns
+        // Updated selectors based on current Google Calendar DOM structure
         const timeSlotElements = document.querySelectorAll(
-          'div[role="button"][data-time-key], ' + // Primary time slot buttons
-          'div[aria-label*="time slot"], ' + // Elements explicitly labeled as time slots
-          'div.AqECfc[data-time], ' + // Another common pattern for time slots
-          'div[role="gridcell"] button, ' + // Calendar grid cells with buttons
-          '.w8Qjne, ' + // Google Calendar time slot class
-          'div[data-time], ' + // Elements with data-time attribute
-          'button[data-time], ' + // Buttons with data-time attribute
-          '.fUzQHe, ' + // Another potential time slot class
-          'div[role="button"]:not([disabled])' // Clickable buttons that aren't disabled
+          'button[jsname="YqGEYe"], ' + // Primary time slot buttons with jsname
+          'button.AeBiU-LgbsSe, ' + // Buttons with AeBiU class
+          'button[aria-label*="am"], ' + // Buttons with AM time labels
+          'button[aria-label*="pm"], ' + // Buttons with PM time labels
+          'button[data-date-time], ' + // Buttons with data-date-time attribute
+          'div[role="listitem"] button, ' + // Buttons inside listitem containers
+          '.NhEBKc, ' + // Google Calendar time slot button class
+          'div[role="button"][data-time-key], ' + // Legacy primary time slot buttons
+          'div[aria-label*="time slot"], ' + // Legacy elements explicitly labeled as time slots
+          'div.AqECfc[data-time], ' + // Legacy pattern for time slots
+          'div[role="gridcell"] button, ' + // Legacy calendar grid cells with buttons
+          '.w8Qjne, ' + // Legacy Google Calendar time slot class
+          'div[data-time], ' + // Legacy elements with data-time attribute
+          'button[data-time], ' + // Legacy buttons with data-time attribute
+          '.fUzQHe, ' + // Legacy potential time slot class
+          'div[role="button"]:not([disabled])' // Legacy clickable buttons that aren't disabled
         );
 
         console.log(`Found ${timeSlotElements.length} potential time slot elements.`);
 
         timeSlotElements.forEach((el, index) => {
+          // Try to get time from the new DOM structure first
+          const timeSpan = el.querySelector('span[jsname="V67aGc"]');
+          const timeFromSpan = timeSpan ? timeSpan.textContent?.trim() : null;
+          
+          // Try aria-label which contains the time for the new structure
+          const ariaLabel = el.getAttribute('aria-label');
+          
+          // Fallback to legacy methods
           const timeText = el.textContent?.trim();
           const dataTimeKey = el.getAttribute('data-time-key');
           const dataTime = el.getAttribute('data-time');
-          const ariaLabel = el.getAttribute('aria-label');
+          const dataDateTime = el.getAttribute('data-date-time');
 
-          let time = timeText || dataTimeKey || dataTime || ariaLabel;
+          let time = timeFromSpan || ariaLabel || timeText || dataTimeKey || dataTime || dataDateTime;
 
           if (time) {
             // Clean up time string
