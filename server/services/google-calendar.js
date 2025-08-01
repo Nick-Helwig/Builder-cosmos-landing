@@ -16,6 +16,9 @@ class GoogleCalendarService {
         const serviceAccount = JSON.parse(
           process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
         );
+        // Decode the base64 private key
+        serviceAccount.private_key = Buffer.from(serviceAccount.private_key_base64, 'base64').toString('ascii');
+        delete serviceAccount.private_key_base64; // Remove the base64 field
 
         const auth = new google.auth.GoogleAuth({
           credentials: serviceAccount,
