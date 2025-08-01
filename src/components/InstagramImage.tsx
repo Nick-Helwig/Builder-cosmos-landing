@@ -32,7 +32,6 @@ const InstagramImage = ({ src, alt, className }: InstagramImageProps) => {
 
   useEffect(() => {
     if (src) {
-      console.log(`InstagramImage: Received src: ${src}`); // Added log
       // Check if it's an Instagram URL
       const isInstagramUrl =
         src.includes("scontent") ||
@@ -44,12 +43,11 @@ const InstagramImage = ({ src, alt, className }: InstagramImageProps) => {
         setImageSrc(proxiedUrl);
         // Only log on first attempt to reduce console noise
         if (retryCount === 0) {
-          console.log(`InstagramImage: Loading Instagram image via proxy: ${proxiedUrl}`); // Modified log
+          console.log("Loading Instagram image via proxy");
         }
       } else {
         // For non-Instagram images, use directly
         setImageSrc(src);
-        console.log(`InstagramImage: Using direct src: ${src}`); // Added log
       }
     }
   }, [src, retryCount]);
@@ -57,11 +55,13 @@ const InstagramImage = ({ src, alt, className }: InstagramImageProps) => {
   const handleImageLoad = () => {
     setLoading(false);
     setError(false);
-    console.log(`✅ InstagramImage: Image loaded successfully for src: ${imageSrc}`); // Modified log
+    // Only log successful loads to reduce console noise
+    if (retryCount === 0) {
+      console.log("✅ Instagram image loaded successfully");
+    }
   };
 
   const handleImageError = () => {
-    console.log(`❌ InstagramImage: Error loading image for src: ${imageSrc}. Retry count: ${retryCount}`); // Modified log
     // Try next proxy if available
     if (retryCount < 2) {
       setRetryCount(retryCount + 1);
@@ -69,7 +69,7 @@ const InstagramImage = ({ src, alt, className }: InstagramImageProps) => {
     }
 
     // All proxies failed, use fallback
-    console.log("❌ InstagramImage: All attempts failed, using hardcoded fallback image."); // Modified log
+    console.log("❌ All proxies failed, using fallback image");
     setLoading(false);
     setError(true);
     setImageSrc(fallbackImage);
