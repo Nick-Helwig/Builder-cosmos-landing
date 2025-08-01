@@ -70,13 +70,27 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Serve cached Instagram images
-const instagramImagesPath = path.join(__dirname, "cache/images");
-console.log(`Serving Instagram images from: ${instagramImagesPath}`); // Added log
-app.use(
-  "/api/instagram/images",
-  express.static(instagramImagesPath),
-);
+// Serve cached Instagram images via a dedicated route
+app.get("/api/instagram/images/:filename", (req, res) => {
+  const filename = req.params.filename;
+  const imagePath = path.join(__dirname, "cache/images", filename);
+  console.log(`Attempting to serve image: ${imagePath}`); // Added log
+
+  // Check if file exists before sending
+  fs.pathExists(imagePath)
+    .then((exists) => {
+      if (exists) {
+        res.sendFile(imagePath);
+      } else {
+        console.error(`Image file not found: ${imagePath}`);
+        res.status(404).send("Image not found");
+      }
+    })
+    .catch((error) => {
+      console.error(`Error serving image ${filename}:`, error);
+      res.status(500).send("Internal server error");
+    });
+});
 
 // Serve fallback images
 app.use(
