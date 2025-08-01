@@ -63,30 +63,30 @@ router.get('/health', async (req, res) => {
   });
 });
 
-// Get available time slots
-router.get('/slots', async (req, res) => {
+// Shared implementation for fetching available slots (extracted from /slots)
+async function getAvailableTimesHandler(req, res) {
   try {
     const { service, days = 30 } = req.query;
-    
+
     console.log('Fetching real appointment slots from Google Calendar booking page...');
-    
+
     // Use booking scraper with timeout to get real slots from the booking page
     const scraper = new BookingScraper();
     let scraperInitialized = false;
-    
+
     try {
       scraperInitialized = await scraper.initialize();
-      
+
       if (scraperInitialized) {
         console.log('Scraper initialized, attempting to scrape...');
-        
+
         const slots = await Promise.race([
           scraper.scrapeAvailableSlots(),
           new Promise((_, reject) => setTimeout(() => reject(new Error('Scraper timeout after 30 seconds')), 30000)) // Increased overall scraper timeout
         ]);
-        
+
         console.log(`Successfully scraped ${slots?.length || 0} real appointment slots`);
-        
+
         // If scraper returned empty results, use known appointment times as fallback
         if (!slots || slots.length === 0) {
           console.log('Scraper returned empty results, using known appointment times...');
@@ -98,7 +98,7 @@ router.get('/slots', async (req, res) => {
             source: 'booking-page-scraper-fallback'
           });
         }
-        
+
         return res.json({
           success: true,
           slots: slots,
@@ -108,18 +108,18 @@ router.get('/slots', async (req, res) => {
       } else {
         console.log('Scraper failed to initialize, trying fallback...');
       }
-      
+
     } catch (scraperError) {
       console.error('Scraper failed:', scraperError.message);
     } finally {
       // Always ensure the scraper is closed
       if (scraperInitialized) {
-        await scraper.close().catch(err => 
+        await scraper.close().catch(err =>
           console.error('Error closing scraper:', err.message)
         );
       }
     }
-    
+
     // If all else fails, use known appointment times as a final fallback
     const fallbackSlots = createKnownAppointmentSlots();
     return res.json({
@@ -135,6 +135,16 @@ router.get('/slots', async (req, res) => {
       message: 'Failed to fetch calendar slots'
     });
   }
+}
+
+// /slots handler delegates to shared implementation
+router.get('/slots', async (req, res) => {
+  return getAvailableTimesHandler(req, res);
+});
+
+// Compatibility alias: /available-times -> uses same logic as /slots
+router.get('/available-times', async (req, res) => {
+  return getAvailableTimesHandler(req, res);
 });
 
 // Book an appointment
