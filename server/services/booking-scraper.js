@@ -10,6 +10,7 @@ class BookingScraper {
       timestamp: null,
       duration: 5 * 60 * 1000 // 5 minutes cache
     };
+    this.forceFallback = true; // Set to true to force fallback behavior
   }
 
   async initialize() {
@@ -47,6 +48,12 @@ class BookingScraper {
       return this.cache.slots;
     }
     
+    if (this.forceFallback) {
+      console.log('Force fallback enabled. Returning dummy slots to trigger fallback logic.');
+      // Return empty data to trigger the fallback logic in formatSlots
+      return this.formatSlots({ timeSlots: [], availableDates: [], currentContext: '', selectedDate: null });
+    }
+
     if (!this.browser) {
       throw new Error('Booking scraper not initialized');
     }
