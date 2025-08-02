@@ -92,7 +92,7 @@ async function getAvailableTimesHandler(req, res) {
     console.error('Google Calendar primary flow failed, falling back:', gcErr?.message || gcErr);
     }
 
-    console.log('Fetching appointment slots via booking page scraper...');
+    console.log('[DIAGNOSTIC] Fetching appointment slots via booking page scraper...');
     // 2) Secondary: Booking page scraper with timeout
     const scraper = new BookingScraper();
     let scraperInitialized = false;

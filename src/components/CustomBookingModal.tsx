@@ -133,7 +133,7 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
     try {
       const controller = new AbortController();
       // allow more time for scraping path; 20s
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // Reduced timeout to 15 seconds
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // Increased timeout to 25 seconds to allow scraper to complete
 
       const url = `${apiBase}/api/calendar/slots?service=${encodeURIComponent(selectedService)}&days=30`;
       console.log("CAL: fetching slots URL=", url);
