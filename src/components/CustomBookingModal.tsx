@@ -157,9 +157,9 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
       }
 
       if (data && data.success && data.redirectUrl) {
-        console.log("CAL: redirecting to Google Calendar:", data.redirectUrl);
-        window.location.href = data.redirectUrl;
-        return; // Stop further processing as we are redirecting
+        console.log("CAL: received redirectUrl, setting fallback to iframe:", data.redirectUrl);
+        setFallbackToIframe(true); // Set fallback to iframe
+        return; // Stop further processing
       } else if (data && data.success && Array.isArray(data.slots)) {
         console.log("CAL: slots response success=", data.success, "count=", data.slots.length, "sample=", data.slots.slice(0,1));
         setSlots(data.slots);
