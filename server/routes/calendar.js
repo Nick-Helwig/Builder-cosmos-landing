@@ -97,6 +97,17 @@ async function getAvailableTimesHandler(req, res) {
     const scraper = new BookingScraper();
     let scraperInitialized = false;
 
+    // Check if forceFallback is enabled in the scraper immediately
+    if (scraper.forceFallback) {
+      console.log('Scraper forceFallback is true. Redirecting to Google Calendar booking page.');
+      return res.json({
+        success: true,
+        redirectUrl: scraper.bookingUrl, // Provide the direct booking URL
+        message: 'Redirecting to Google Calendar for booking.',
+        source: 'force-fallback-redirect'
+      });
+    }
+
     try {
       scraperInitialized = await scraper.initialize();
 
