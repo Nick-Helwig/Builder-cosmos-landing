@@ -156,7 +156,11 @@ const CustomBookingModal = ({ isOpen, onClose }: CustomBookingModalProps) => {
         throw new Error(`Invalid JSON from slots endpoint: ${String(jsonErr)}`);
       }
 
-      if (data && data.success && Array.isArray(data.slots)) {
+      if (data && data.success && data.redirectUrl) {
+        console.log("CAL: redirecting to Google Calendar:", data.redirectUrl);
+        window.location.href = data.redirectUrl;
+        return; // Stop further processing as we are redirecting
+      } else if (data && data.success && Array.isArray(data.slots)) {
         console.log("CAL: slots response success=", data.success, "count=", data.slots.length, "sample=", data.slots.slice(0,1));
         setSlots(data.slots);
       } else {
